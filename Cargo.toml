@@ -1,6 +1,6 @@
 [package]
 authors = ["Jungin Yu <jungini1226@gmail.com>"]
-description = "A productivity tool for managing tasks and projects."
+description = "A productivity cli tool for managing tasks and projects, and session."
 edition = "2024"
 name = "ppm_rs"
 version = "0.1.0"
