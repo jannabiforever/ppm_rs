@@ -5,6 +5,7 @@ use clap::{Parser, Subcommand};
 use commands::CommandHandler;
 use ppm_core::config::Config;
 use ppm_core::context::PPMContext;
+use ppm_core::services::Service;
 
 #[derive(Parser, Debug)]
 #[command(name = "ppm")]
@@ -20,6 +21,7 @@ pub enum PPMCommand {
 		#[arg(short, long)]
 		duration: Option<u32>,
 	},
+	End,
 }
 
 fn main() -> Result<(), errors::PPMCliError> {
@@ -33,13 +35,19 @@ fn main() -> Result<(), errors::PPMCliError> {
 	// Parse CLI arguments
 	let cli = PPMCli::parse();
 
-	// Execute command with injected context
+	// Build and execute service
 	match cli.command {
 		PPMCommand::Start {
 			duration,
 		} => {
 			let command = commands::start::StartCommand::new(duration);
-			command.execute(context)?;
+			let service = command.build_service(context);
+			service.run()?;
+		}
+		PPMCommand::End => {
+			let command = commands::end::EndCommand::new();
+			let service = command.build_service(context);
+			service.run()?;
 		}
 	}
 

@@ -1,5 +1,9 @@
+pub mod in_memory_writer;
+
 use std::sync::Mutex;
 use std::{fmt, io};
+
+pub use in_memory_writer::InMemoryWriter;
 
 use crate::errors::{PPMError, PPMResult};
 

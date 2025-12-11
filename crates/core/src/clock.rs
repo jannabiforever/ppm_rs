@@ -34,25 +34,19 @@ impl Clock for SystemClock {
 // Test Utilities
 // --------------------------------------------------------------------------------
 
-#[cfg(test)]
+/// Fixed clock for testing - always returns the same time
 pub struct FixedClock {
 	time: DateTime<Utc>,
 }
 
-#[cfg(test)]
 impl FixedClock {
 	pub fn new(time: DateTime<Utc>) -> Self {
 		Self {
 			time,
 		}
 	}
-
-	pub fn set_time(&mut self, time: DateTime<Utc>) {
-		self.time = time;
-	}
 }
 
-#[cfg(test)]
 impl Clock for FixedClock {
 	fn now(&self) -> DateTime<Utc> {
 		self.time

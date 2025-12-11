@@ -1,9 +1,7 @@
 use ppm_core::context::PPMContext;
-use ppm_core::services::Service;
-use ppm_core::services::start_focus_session::LocallyStartFocusSession;
+use ppm_core::services::start_focus_session::StartFocusSession;
 
 use crate::commands::CommandHandler;
-use crate::errors::PPMCliError;
 
 pub struct StartCommand {
 	pub duration: Option<u32>,
@@ -18,16 +16,16 @@ impl StartCommand {
 }
 
 impl CommandHandler for StartCommand {
-	fn execute(self, context: PPMContext) -> Result<(), PPMCliError> {
-		let service = LocallyStartFocusSession::new(
-			context.clock.clone(),
-			context.session_repository.clone(),
-			context.output_writer.clone(),
-			self.duration.unwrap_or(context.config.default_focus_duration_in_minutes),
-		);
+	type Service = StartFocusSession;
 
-		service.run()?;
-
-		Ok(())
+	fn build_service(self, context: PPMContext) -> Self::Service {
+		StartFocusSession {
+			clock: context.clock.clone(),
+			repository: context.session_repository.clone(),
+			output_writer: context.output_writer.clone(),
+			duration_in_minutes: self
+				.duration
+				.unwrap_or(context.config.default_focus_duration_in_minutes),
+		}
 	}
 }

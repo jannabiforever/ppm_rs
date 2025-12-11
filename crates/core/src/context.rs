@@ -6,6 +6,7 @@ use crate::config::Config;
 use crate::output::{OutputWriter, stdout_writer};
 use crate::repositories::{LocalSessionRepository, SessionRepository};
 
+#[derive(Clone)]
 pub struct PPMContext {
 	pub config: Config,
 	pub clock: Arc<dyn Clock>,

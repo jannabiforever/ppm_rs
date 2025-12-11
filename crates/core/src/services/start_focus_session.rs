@@ -9,50 +9,14 @@ use crate::output::OutputWriter;
 use crate::repositories::SessionRepository;
 use crate::services::Service;
 
-pub trait StartFocusSessionService {
-	fn ensure_no_active_focus_session(&self) -> PPMResult<()>;
-
-	fn create_new_focus_session(&self) -> PPMResult<()>;
+pub struct StartFocusSession {
+	pub clock: Arc<dyn Clock>,
+	pub repository: Arc<dyn SessionRepository>,
+	pub output_writer: Arc<dyn OutputWriter>,
+	pub duration_in_minutes: u32,
 }
 
-impl<S: StartFocusSessionService> Service for S {
-	type Output = ();
-
-	fn run(self) -> PPMResult<Self::Output> {
-		self.ensure_no_active_focus_session()?;
-		self.create_new_focus_session()?;
-		Ok(())
-	}
-}
-
-// --------------------------------------------------------------------------------
-// Concrete Implementations
-// --------------------------------------------------------------------------------
-
-pub struct LocallyStartFocusSession {
-	clock: Arc<dyn Clock>,
-	repository: Arc<dyn SessionRepository>,
-	output_writer: Arc<dyn OutputWriter>,
-	duration_in_minutes: u32,
-}
-
-impl LocallyStartFocusSession {
-	pub fn new(
-		clock: Arc<dyn Clock>,
-		repository: Arc<dyn SessionRepository>,
-		output_writer: Arc<dyn OutputWriter>,
-		duration_in_minutes: u32,
-	) -> Self {
-		Self {
-			clock,
-			repository,
-			output_writer,
-			duration_in_minutes,
-		}
-	}
-}
-
-impl StartFocusSessionService for LocallyStartFocusSession {
+impl StartFocusSession {
 	fn ensure_no_active_focus_session(&self) -> PPMResult<()> {
 		if self.repository.get_active_session(self.clock.now())?.is_some() {
 			return Err(PPMError::SessionAlreadyActive);
@@ -75,6 +39,16 @@ impl StartFocusSessionService for LocallyStartFocusSession {
 		self.output_writer
 			.write_line(&format!("Duration: {} minutes", self.duration_in_minutes))?;
 
+		Ok(())
+	}
+}
+
+impl Service for StartFocusSession {
+	type Output = ();
+
+	fn run(self) -> PPMResult<Self::Output> {
+		self.ensure_no_active_focus_session()?;
+		self.create_new_focus_session()?;
 		Ok(())
 	}
 }

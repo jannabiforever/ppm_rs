@@ -1,3 +1,4 @@
+pub mod end_focus_session;
 pub mod start_focus_session;
 
 use crate::errors::PPMResult;
