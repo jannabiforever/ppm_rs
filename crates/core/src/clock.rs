@@ -46,6 +46,10 @@ impl FixedClock {
 			time,
 		}
 	}
+
+	pub fn set_time(&mut self, time: DateTime<Utc>) {
+		self.time = time;
+	}
 }
 
 #[cfg(test)]
