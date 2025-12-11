@@ -1,0 +1,5 @@
+[package]
+name = "ppm_core"
+authors.workspace = true
+edition.workspace = true
+version.workspace = true

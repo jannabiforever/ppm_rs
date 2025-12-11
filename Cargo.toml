@@ -1,0 +1,16 @@
+[package]
+authors = ["Jungin Yu <jungini1226@gmail.com>"]
+description = "A productivity tool for managing tasks and projects."
+edition = "2024"
+name = "ppm_rs"
+version = "0.1.0"
+
+[workspace]
+members = ["crates/core"]
+
+[workspace.package]
+authors = ["Jungin Yu <jungini1226@gmail.com>"]
+edition = "2024"
+version = "0.1.0"
+
+[dependencies]
