@@ -20,12 +20,13 @@ impl StartCommand {
 impl CommandHandler for StartCommand {
 	fn execute(self, context: PPMContext) -> Result<(), PPMCliError> {
 		let service = LocallyStartFocusSession::new(
+			context.clock.clone(),
 			context.session_repository.clone(),
 			context.output_writer.clone(),
 			self.duration.unwrap_or(context.config.default_focus_duration_in_minutes),
 		);
 
-		service.run()?;
+		service.run().map_err(PPMCliError::CoreError)?;
 
 		Ok(())
 	}

@@ -29,9 +29,12 @@ impl Config {
 
 impl Default for Config {
 	fn default() -> Self {
+		let home = std::env::var("HOME").unwrap_or_else(|_| String::from("."));
+		let storage_path = format!("{}/.config/ppm/sessions.json", home);
+
 		Self {
 			default_focus_duration_in_minutes: 60,
-			session_storage_path: String::from("~/.config/ppm/sessions"),
+			session_storage_path: storage_path,
 		}
 	}
 }

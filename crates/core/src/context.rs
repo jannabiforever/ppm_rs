@@ -1,20 +1,27 @@
+use std::path::PathBuf;
 use std::sync::Arc;
 
+use crate::clock::{Clock, SystemClock};
 use crate::config::Config;
 use crate::output::{OutputWriter, stdout_writer};
 use crate::repositories::{LocalSessionRepository, SessionRepository};
 
 pub struct PPMContext {
 	pub config: Config,
+	pub clock: Arc<dyn Clock>,
 	pub session_repository: Arc<dyn SessionRepository>,
 	pub output_writer: Arc<dyn OutputWriter>,
 }
 
 impl PPMContext {
 	pub fn new(config: Config) -> Self {
+		let clock = Arc::new(SystemClock::new());
+		let storage_path = PathBuf::from(&config.session_storage_path);
+
 		Self {
 			config,
-			session_repository: Arc::new(LocalSessionRepository::new()),
+			clock: clock.clone(),
+			session_repository: Arc::new(LocalSessionRepository::new(storage_path)),
 			output_writer: Arc::new(stdout_writer()),
 		}
 	}
@@ -31,6 +38,7 @@ impl PPMContext {
 #[derive(Default)]
 pub struct PPMContextBuilder {
 	config: Option<Config>,
+	clock: Option<Arc<dyn Clock>>,
 	session_repository: Option<Arc<dyn SessionRepository>>,
 	output_writer: Option<Arc<dyn OutputWriter>>,
 }
@@ -38,6 +46,11 @@ pub struct PPMContextBuilder {
 impl PPMContextBuilder {
 	pub fn config(mut self, config: Config) -> Self {
 		self.config = Some(config);
+		self
+	}
+
+	pub fn clock(mut self, clock: Arc<dyn Clock>) -> Self {
+		self.clock = Some(clock);
 		self
 	}
 
@@ -52,11 +65,16 @@ impl PPMContextBuilder {
 	}
 
 	pub fn build(self) -> PPMContext {
+		let config = self.config.unwrap_or_default();
+		let clock = self.clock.unwrap_or_else(|| Arc::new(SystemClock::new()));
+		let storage_path = PathBuf::from(&config.session_storage_path);
+
 		PPMContext {
-			config: self.config.unwrap_or_default(),
+			config,
+			clock: clock.clone(),
 			session_repository: self
 				.session_repository
-				.unwrap_or_else(|| Arc::new(LocalSessionRepository::new())),
+				.unwrap_or_else(|| Arc::new(LocalSessionRepository::new(storage_path))),
 			output_writer: self.output_writer.unwrap_or_else(|| Arc::new(stdout_writer())),
 		}
 	}

@@ -15,11 +15,14 @@ pub enum PPMError {
 	#[error("Configuration error: {0}")]
 	ConfigError(String),
 
-	#[error("IO error: {0}")]
+	#[error("{0}")]
 	IoError(#[from] std::io::Error),
 
 	#[error("Failed to acquire output writer lock")]
 	LockError,
+
+	#[error("{0}")]
+	SerdeJson(#[from] serde_json::Error),
 }
 
 impl PartialEq for PPMError {

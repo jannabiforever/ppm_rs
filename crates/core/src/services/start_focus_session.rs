@@ -1,9 +1,10 @@
 use std::sync::Arc;
 
-use chrono::{Duration, Utc};
+use chrono::Duration;
 
+use crate::clock::Clock;
 use crate::errors::{PPMError, PPMResult};
-use crate::models::FocusSession;
+use crate::models::{FocusSession, generate_session_id};
 use crate::output::OutputWriter;
 use crate::repositories::SessionRepository;
 use crate::services::Service;
@@ -29,6 +30,7 @@ impl<S: StartFocusSessionService> Service for S {
 // --------------------------------------------------------------------------------
 
 pub struct LocallyStartFocusSession {
+	clock: Arc<dyn Clock>,
 	repository: Arc<dyn SessionRepository>,
 	output_writer: Arc<dyn OutputWriter>,
 	duration_in_minutes: u32,
@@ -36,11 +38,13 @@ pub struct LocallyStartFocusSession {
 
 impl LocallyStartFocusSession {
 	pub fn new(
+		clock: Arc<dyn Clock>,
 		repository: Arc<dyn SessionRepository>,
 		output_writer: Arc<dyn OutputWriter>,
 		duration_in_minutes: u32,
 	) -> Self {
 		Self {
+			clock,
 			repository,
 			output_writer,
 			duration_in_minutes,
@@ -50,7 +54,7 @@ impl LocallyStartFocusSession {
 
 impl StartFocusSessionService for LocallyStartFocusSession {
 	fn ensure_no_active_focus_session(&self) -> PPMResult<()> {
-		if self.repository.get_active_session()?.is_some() {
+		if self.repository.get_active_session(self.clock.now())?.is_some() {
 			return Err(PPMError::SessionAlreadyActive);
 		}
 		Ok(())
@@ -58,10 +62,12 @@ impl StartFocusSessionService for LocallyStartFocusSession {
 
 	fn create_new_focus_session(&self) -> PPMResult<()> {
 		let duration_seconds = self.duration_in_minutes as i64 * 60;
-		let session = FocusSession {
-			start: Utc::now(),
-			end: Utc::now() + Duration::seconds(duration_seconds),
-		};
+		let now = self.clock.now();
+		let session = FocusSession::new(
+			generate_session_id(),
+			now,
+			now + Duration::seconds(duration_seconds),
+		);
 
 		self.repository.create_session(session)?;
 
