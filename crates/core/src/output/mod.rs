@@ -1,39 +1,31 @@
-use std::fmt::Display;
+use std::sync::Mutex;
+use std::{fmt, io};
+
+use crate::errors::{PPMError, PPMResult};
 
 pub trait OutputWriter: Send + Sync {
-	fn write(&self, message: &dyn Display);
-	fn write_line(&self, message: &dyn Display);
-	fn write_error(&self, message: &dyn Display);
+	fn write(&self, message: &dyn fmt::Display) -> PPMResult<()>;
+	fn write_line(&self, message: &dyn fmt::Display) -> PPMResult<()>;
 }
 
 // --------------------------------------------------------------------------------
 // Concrete Implementations
 // --------------------------------------------------------------------------------
 
-pub struct StdoutWriter;
+impl<W: io::Write + Send> OutputWriter for Mutex<W> {
+	fn write(&self, message: &dyn fmt::Display) -> PPMResult<()> {
+		let mut writer = self.lock().map_err(|_| PPMError::LockError)?;
+		write!(writer, "{}", message)?;
+		Ok(())
+	}
 
-impl StdoutWriter {
-	pub fn new() -> Self {
-		Self
+	fn write_line(&self, message: &dyn fmt::Display) -> PPMResult<()> {
+		let mut writer = self.lock().map_err(|_| PPMError::LockError)?;
+		writeln!(writer, "{}", message)?;
+		Ok(())
 	}
 }
 
-impl Default for StdoutWriter {
-	fn default() -> Self {
-		Self::new()
-	}
-}
-
-impl OutputWriter for StdoutWriter {
-	fn write(&self, message: &dyn Display) {
-		print!("{}", message);
-	}
-
-	fn write_line(&self, message: &dyn Display) {
-		println!("{}", message);
-	}
-
-	fn write_error(&self, message: &dyn Display) {
-		eprintln!("{}", message);
-	}
+pub fn stdout_writer() -> Mutex<io::Stdout> {
+	Mutex::new(io::stdout())
 }

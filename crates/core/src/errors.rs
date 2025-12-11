@@ -1,4 +1,4 @@
-#[derive(Debug, Clone, PartialEq, thiserror::Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum PPMError {
 	#[error("A focus session is already active")]
 	SessionAlreadyActive,
@@ -16,7 +16,17 @@ pub enum PPMError {
 	ConfigError(String),
 
 	#[error("IO error: {0}")]
-	IoError(String),
+	IoError(#[from] std::io::Error),
+
+	#[error("Failed to acquire output writer lock")]
+	LockError,
+}
+
+impl PartialEq for PPMError {
+	fn eq(&self, other: &Self) -> bool {
+		// errors should be identified by their display strings.
+		self.to_string() == other.to_string()
+	}
 }
 
 pub type PPMResult<T> = Result<T, PPMError>;

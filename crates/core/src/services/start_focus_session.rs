@@ -65,8 +65,9 @@ impl StartFocusSessionService for LocallyStartFocusSession {
 
 		self.repository.create_session(session)?;
 
-		self.output_writer.write_line(&"[ppm] Focus session started");
-		self.output_writer.write_line(&format!("Duration: {} minutes", self.duration_in_minutes));
+		self.output_writer.write_line(&"[ppm] Focus session started")?;
+		self.output_writer
+			.write_line(&format!("Duration: {} minutes", self.duration_in_minutes))?;
 
 		Ok(())
 	}

@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use crate::config::Config;
-use crate::output::{OutputWriter, StdoutWriter};
+use crate::output::{OutputWriter, stdout_writer};
 use crate::repositories::{LocalSessionRepository, SessionRepository};
 
 pub struct PPMContext {
@@ -15,7 +15,7 @@ impl PPMContext {
 		Self {
 			config,
 			session_repository: Arc::new(LocalSessionRepository::new()),
-			output_writer: Arc::new(StdoutWriter::new()),
+			output_writer: Arc::new(stdout_writer()),
 		}
 	}
 
@@ -57,7 +57,7 @@ impl PPMContextBuilder {
 			session_repository: self
 				.session_repository
 				.unwrap_or_else(|| Arc::new(LocalSessionRepository::new())),
-			output_writer: self.output_writer.unwrap_or_else(|| Arc::new(StdoutWriter::new())),
+			output_writer: self.output_writer.unwrap_or_else(|| Arc::new(stdout_writer())),
 		}
 	}
 }
