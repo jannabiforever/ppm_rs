@@ -26,7 +26,7 @@ impl CommandHandler for StartCommand {
 			self.duration.unwrap_or(context.config.default_focus_duration_in_minutes),
 		);
 
-		service.run().map_err(PPMCliError::CoreError)?;
+		service.run()?;
 
 		Ok(())
 	}
