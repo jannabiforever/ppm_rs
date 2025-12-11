@@ -1,5 +1,9 @@
 [
   {
+    "label": "run fmt and clippy",
+    "command": "cargo +nightly fmt --all && cargo clippy --all"
+  },
+  {
     "label": "run test core",
     "command": "cargo test -p ppm_core"
   },
