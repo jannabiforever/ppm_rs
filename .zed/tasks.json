@@ -1,0 +1,10 @@
+[
+  {
+    "label": "run test core",
+    "command": "cargo test -p ppm_core"
+  },
+  {
+    "label": "run test cli",
+    "command": "cargo test -p ppm_rs"
+  }
+]
