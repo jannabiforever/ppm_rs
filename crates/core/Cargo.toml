@@ -3,3 +3,8 @@ name = "ppm_core"
 authors.workspace = true
 edition.workspace = true
 version.workspace = true
+
+[dependencies]
+thiserror.workspace = true
+serde.workspace = true
+chrono = { version = "0.4.42", features = ["serde"] }

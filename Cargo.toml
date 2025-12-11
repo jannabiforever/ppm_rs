@@ -13,4 +13,14 @@ authors = ["Jungin Yu <jungini1226@gmail.com>"]
 edition = "2024"
 version = "0.1.0"
 
+[workspace.dependencies]
+thiserror = "2.0.17"
+serde = { version = "1.0.228", features = ["derive"] }
+
 [dependencies]
+ppm_core = { path = "./crates/core" }
+
+thiserror.workspace = true
+serde.workspace = true
+
+clap = { version = "4.5.53", features = ["derive"] }
