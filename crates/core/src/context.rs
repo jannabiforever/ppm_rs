@@ -6,6 +6,10 @@ use crate::config::Config;
 use crate::output::{OutputWriter, stdout_writer};
 use crate::repositories::{LocalSessionRepository, SessionRepository};
 
+/// Dependency injection container.
+///
+/// Assembled in main.rs and passed to CommandHandlers.
+/// Clone is cheap (Arc clones only increment reference counts).
 #[derive(Clone)]
 pub struct PPMContext {
 	pub config: Config,

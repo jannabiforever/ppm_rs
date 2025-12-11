@@ -1,6 +1,9 @@
 use chrono::{DateTime, Utc};
 
-/// Clock abstraction for testability
+/// Time abstraction to make services testable.
+///
+/// Never use `Utc::now()` directly in services - always inject Clock.
+/// This allows tests to use FixedClock for deterministic behavior.
 pub trait Clock: Send + Sync {
 	fn now(&self) -> DateTime<Utc>;
 }
@@ -34,7 +37,9 @@ impl Clock for SystemClock {
 // Test Utilities
 // --------------------------------------------------------------------------------
 
-/// Fixed clock for testing - always returns the same time
+/// Fixed clock for testing - always returns the same time.
+///
+/// Note: Not marked with #[cfg(test)] so it's accessible in integration tests.
 pub struct FixedClock {
 	time: DateTime<Utc>,
 }

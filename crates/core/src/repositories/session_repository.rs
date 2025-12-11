@@ -7,6 +7,10 @@ use chrono::{DateTime, Utc};
 use crate::errors::{PPMError, PPMResult};
 use crate::models::FocusSession;
 
+/// Data access abstraction for focus sessions.
+///
+/// Note: Methods take `current_time` as parameter (dependency inversion).
+/// This avoids Repository depending on Clock - time comes from the service layer.
 pub trait SessionRepository: Send + Sync {
 	fn get_active_session(&self, current_time: DateTime<Utc>) -> PPMResult<Option<FocusSession>>;
 	fn create_session(&self, session: FocusSession) -> PPMResult<()>;
@@ -18,6 +22,9 @@ pub trait SessionRepository: Send + Sync {
 // Concrete Implementations
 // --------------------------------------------------------------------------------
 
+/// File-based session repository storing data in JSON format.
+///
+/// Sessions are stored at ~/.config/ppm/sessions.json
 pub struct LocalSessionRepository {
 	storage_path: PathBuf,
 }

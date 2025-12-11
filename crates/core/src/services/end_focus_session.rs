@@ -6,6 +6,9 @@ use crate::output::OutputWriter;
 use crate::repositories::SessionRepository;
 use crate::services::Service;
 
+/// Service to end the currently active focus session.
+///
+/// Updates the session's end time to now and outputs confirmation.
 pub struct EndFocusSession {
 	pub clock: Arc<dyn Clock>,
 	pub repository: Arc<dyn SessionRepository>,

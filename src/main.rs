@@ -24,6 +24,12 @@ pub enum PPMCommand {
 	End,
 }
 
+/// Entry point: Load config → Assemble dependencies → Execute command
+///
+/// Three-step pattern:
+/// 1. Create Command from CLI args
+/// 2. Build Service from Command (injecting dependencies via context)
+/// 3. Execute Service to perform business logic
 fn main() -> Result<(), errors::PPMCliError> {
 	// Load configuration
 	let config = Config::load()?;

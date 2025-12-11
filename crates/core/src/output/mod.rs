@@ -7,6 +7,10 @@ pub use in_memory_writer::InMemoryWriter;
 
 use crate::errors::{PPMError, PPMResult};
 
+/// Output abstraction for testability and flexibility.
+///
+/// Never use `println!` directly - always inject OutputWriter.
+/// Uses interior mutability (Mutex) to allow &self methods on trait objects.
 pub trait OutputWriter: Send + Sync {
 	fn write(&self, message: &dyn fmt::Display) -> PPMResult<()>;
 	fn write_line(&self, message: &dyn fmt::Display) -> PPMResult<()>;

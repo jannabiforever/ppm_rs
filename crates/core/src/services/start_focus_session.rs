@@ -9,6 +9,10 @@ use crate::output::OutputWriter;
 use crate::repositories::SessionRepository;
 use crate::services::Service;
 
+/// Service to start a new focus session.
+///
+/// Validates no active session exists, creates a new session,
+/// and outputs confirmation to the user.
 pub struct StartFocusSession {
 	pub clock: Arc<dyn Clock>,
 	pub repository: Arc<dyn SessionRepository>,
