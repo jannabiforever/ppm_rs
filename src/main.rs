@@ -1,6 +1,10 @@
+mod commands;
 mod errors;
 
 use clap::{Parser, Subcommand};
+use commands::CommandHandler;
+use ppm_core::config::Config;
+use ppm_core::context::PPMContext;
 
 #[derive(Parser, Debug)]
 #[command(name = "ppm")]
@@ -18,33 +22,24 @@ pub enum PPMCommand {
 	},
 }
 
-fn load_config() -> Result<(), errors::PPMCliError> {
-	Ok(())
-}
-
-fn setup() -> Result<(), errors::PPMCliError> {
-	Ok(())
-}
-
 fn main() -> Result<(), errors::PPMCliError> {
-	// Setup
-	load_config()?;
+	// Load configuration
+	let config = Config::load()?;
+	config.validate()?;
 
-	setup()?;
+	// Assemble dependencies (Dependency Injection)
+	let context = PPMContext::new(config);
 
+	// Parse CLI arguments
 	let cli = PPMCli::parse();
 
+	// Execute command with injected context
 	match cli.command {
 		PPMCommand::Start {
 			duration,
 		} => {
-			println!("[ppm] Starting focus session");
-
-			if let Some(duration) = duration {
-				println!("Duration: {} seconds", duration);
-			} else {
-				println!("Duration: 60 seconds");
-			}
+			let command = commands::start::StartCommand::new(duration);
+			command.execute(context)?;
 		}
 	}
 

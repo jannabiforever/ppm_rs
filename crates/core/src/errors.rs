@@ -1,5 +1,22 @@
 #[derive(Debug, Clone, PartialEq, thiserror::Error)]
+pub enum PPMError {
+	#[error("A focus session is already active")]
+	SessionAlreadyActive,
 
-pub enum PPMError {}
+	#[error("No active focus session found")]
+	NoActiveSession,
 
-pub(crate) type PPMResult<T> = Result<T, PPMError>;
+	#[error("Failed to create focus session: {0}")]
+	SessionCreationFailed(String),
+
+	#[error("Failed to end focus session: {0}")]
+	SessionEndFailed(String),
+
+	#[error("Configuration error: {0}")]
+	ConfigError(String),
+
+	#[error("IO error: {0}")]
+	IoError(String),
+}
+
+pub type PPMResult<T> = Result<T, PPMError>;

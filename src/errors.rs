@@ -1,5 +1,4 @@
 #[derive(Debug, thiserror::Error)]
-
 pub enum PPMCliError {
 	#[error("{0}")]
 	Io(#[from] std::io::Error),
@@ -8,5 +7,5 @@ pub enum PPMCliError {
 	CommandParse(#[from] clap::Error),
 
 	#[error("{0}")]
-	Core(#[from] ppm_core::errors::PPMError),
+	CoreError(#[from] ppm_core::errors::PPMError),
 }
