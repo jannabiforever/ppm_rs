@@ -9,3 +9,4 @@ thiserror.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 chrono.workspace = true
+model_macros = { path = "../model_macros" }

@@ -6,7 +6,7 @@ name = "ppm_rs"
 version = "0.1.0"
 
 [workspace]
-members = ["crates/core"]
+members = ["crates/core", "crates/model_macros"]
 
 [workspace.package]
 authors = ["Jungin Yu <jungini1226@gmail.com>"]

@@ -1,36 +1,18 @@
-use std::fmt;
-
 use chrono::{DateTime, Duration, Utc};
+use model_macros::{model_id, model_name};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub fn gen_id() -> String {
+	use std::time::{SystemTime, UNIX_EPOCH};
+	let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros();
+	format!("{}", timestamp)
+}
+
+#[model_id(prefix = "session_", gen = crate::models::gen_id)]
 pub struct FocusSessionId(pub String);
 
-impl FocusSessionId {
-	pub fn new() -> Self {
-		use std::time::{SystemTime, UNIX_EPOCH};
-		let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros();
-		FocusSessionId(format!("session_{}", timestamp))
-	}
-}
-
-impl Default for FocusSessionId {
-	fn default() -> Self {
-		Self::new()
-	}
-}
-
-impl fmt::Display for FocusSessionId {
-	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		write!(f, "{}", self.0)
-	}
-}
-
-impl From<String> for FocusSessionId {
-	fn from(value: String) -> Self {
-		Self(value)
-	}
-}
+#[model_name]
+pub struct ProjectName(pub String);
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FocusSession {
@@ -50,50 +32,31 @@ impl FocusSession {
 	}
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ProjectName(pub String);
-
-impl fmt::Display for ProjectName {
-	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		write!(f, "{}", self.0)
-	}
-}
-
-impl From<String> for ProjectName {
-	fn from(value: String) -> Self {
-		Self(value)
-	}
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Project {
-	pub name: ProjectName,
-	pub description: String,
-	pub is_active: bool,
-	pub created_at: DateTime<Utc>,
-}
+#[model_id(prefix = "task_", gen = crate::models::gen_id)]
+pub struct TaskId(pub String);
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Task {
-	pub id: String,
+	pub id: TaskId,
 	pub project_name: ProjectName,
 	pub description: String,
 	pub status: TaskStatus,
 	pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum TaskStatus {
 	Pending,
-	/// Done with a timestamp
 	Done(DateTime<Utc>),
-	/// Canceled with a timestamp
 	Canceled(DateTime<Utc>),
 }
 
+#[model_id(prefix = "note_", gen = crate::models::gen_id)]
+pub struct NoteId(pub String);
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Note {
-	pub id: String,
+	pub id: NoteId,
 	pub associated_project_name: Option<ProjectName>,
 	pub content: String,
 	pub created_at: DateTime<Utc>,
