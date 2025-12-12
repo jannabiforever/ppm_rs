@@ -24,8 +24,6 @@ pub trait SessionRepository: Send + Sync {
 // --------------------------------------------------------------------------------
 
 /// File-based session repository storing data in JSON format.
-///
-/// Sessions are stored at ~/.config/ppm/sessions.json
 pub struct LocalSessionRepository {
 	storage_path: PathBuf,
 }
