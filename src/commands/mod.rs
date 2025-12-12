@@ -1,4 +1,6 @@
+pub mod note;
 pub mod session;
+pub mod task;
 
 use ppm_core::context::PPMContext;
 use ppm_core::services::Service;

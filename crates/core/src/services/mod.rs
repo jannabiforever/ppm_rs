@@ -1,4 +1,6 @@
+pub mod note;
 pub mod session;
+pub mod task;
 
 use crate::errors::PPMResult;
 

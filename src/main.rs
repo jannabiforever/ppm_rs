@@ -7,7 +7,9 @@ use ppm_core::context::PPMContext;
 use ppm_core::errors::PPMError;
 use ppm_core::services::Service;
 
+use crate::commands::note::NoteCommand;
 use crate::commands::session::SessionCommand;
+use crate::commands::task::TaskCommand;
 
 #[derive(Parser, Debug)]
 #[command(name = "ppm")]
@@ -22,6 +24,14 @@ pub enum PPMCommand {
 	/// Utilities for focus sessions
 	#[command(subcommand)]
 	Sess(commands::session::SessionCommand),
+
+	/// Task management
+	#[command(subcommand)]
+	Task(commands::task::TaskCommand),
+
+	/// Note management
+	#[command(subcommand)]
+	Note(commands::note::NoteCommand),
 }
 
 /// Entry point: Load config → Assemble dependencies → Execute command
@@ -56,6 +66,14 @@ fn run() -> Result<(), PPMError> {
 		PPMCommand::Sess(SessionCommand::Cancel(command)) => command.build_service(context).run(),
 		PPMCommand::Sess(SessionCommand::List(command)) => command.build_service(context).run(),
 		PPMCommand::Sess(SessionCommand::Stats(command)) => command.build_service(context).run(),
+
+		PPMCommand::Task(TaskCommand::Add(command)) => command.build_service(context).run(),
+		PPMCommand::Task(TaskCommand::List(command)) => command.build_service(context).run(),
+		PPMCommand::Task(TaskCommand::Done(command)) => command.build_service(context).run(),
+
+		PPMCommand::Note(NoteCommand::Add(command)) => command.build_service(context).run(),
+		PPMCommand::Note(NoteCommand::List(command)) => command.build_service(context).run(),
+		PPMCommand::Note(NoteCommand::Delete(command)) => command.build_service(context).run(),
 	}?;
 
 	Ok(())
