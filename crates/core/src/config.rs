@@ -6,6 +6,8 @@ use crate::errors::{PPMError, PPMResult};
 pub struct Config {
 	pub default_focus_duration_in_minutes: u32,
 	pub session_storage_path: String,
+	pub task_storage_path: String,
+	pub note_storage_path: String,
 }
 
 impl Config {
@@ -30,11 +32,15 @@ impl Config {
 impl Default for Config {
 	fn default() -> Self {
 		let home = std::env::var("HOME").unwrap_or_else(|_| String::from("."));
-		let storage_path = format!("{}/.config/ppm/sessions.json", home);
+		let session_storage_path = format!("{}/.config/ppm/sessions.json", home);
+		let task_storage_path = format!("{}/.config/ppm/tasks.json", home);
+		let note_storage_path = format!("{}/.config/ppm/notes.json", home);
 
 		Self {
 			default_focus_duration_in_minutes: 60,
-			session_storage_path: storage_path,
+			session_storage_path,
+			task_storage_path,
+			note_storage_path,
 		}
 	}
 }

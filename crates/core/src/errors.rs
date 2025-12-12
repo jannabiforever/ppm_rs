@@ -12,6 +12,9 @@ pub enum PPMError {
 	#[error("Failed to end focus session: {0}")]
 	SessionEndFailed(String),
 
+	#[error("{0}")]
+	NotFound(String),
+
 	#[error("Configuration error: {0}")]
 	ConfigError(String),
 
