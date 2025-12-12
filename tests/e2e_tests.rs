@@ -31,7 +31,9 @@ fn create_test_context() -> (PPMContext, Arc<FixedClock>, Arc<InMemoryWriter>) {
 fn test_start_command_creates_session() {
 	// Arrange
 	let (context, _clock, writer) = create_test_context();
-	let command = StartCommand::new(Some(30));
+	let command = StartCommand {
+		duration: Some(30),
+	};
 
 	// Act
 	let service = command.build_service(context);
@@ -50,7 +52,9 @@ fn test_start_command_creates_session() {
 fn test_start_command_uses_default_duration() {
 	// Arrange
 	let (context, _clock, writer) = create_test_context();
-	let command = StartCommand::new(None);
+	let command = StartCommand {
+		duration: None,
+	};
 
 	// Act
 	let service = command.build_service(context);
@@ -69,12 +73,16 @@ fn test_start_command_fails_when_session_already_active() {
 	let (context, _clock, _writer) = create_test_context();
 
 	// Start first session
-	let command1 = StartCommand::new(Some(30));
+	let command1 = StartCommand {
+		duration: Some(30),
+	};
 	let service1 = command1.build_service(context.clone());
 	service1.run().expect("First session should succeed");
 
 	// Try to start second session
-	let command2 = StartCommand::new(Some(30));
+	let command2 = StartCommand {
+		duration: Some(30),
+	};
 	let service2 = command2.build_service(context);
 
 	// Act
@@ -92,14 +100,16 @@ fn test_end_command_ends_active_session() {
 	let (context, _clock, writer) = create_test_context();
 
 	// Start a session first
-	let start_command = StartCommand::new(Some(30));
+	let start_command = StartCommand {
+		duration: Some(30),
+	};
 	let start_service = start_command.build_service(context.clone());
 	start_service.run().expect("Starting session should succeed");
 
 	writer.clear(); // Clear start output
 
 	// Act
-	let end_command = EndCommand::new();
+	let end_command = EndCommand {};
 	let end_service = end_command.build_service(context);
 	let result = end_service.run();
 
@@ -116,7 +126,7 @@ fn test_end_command_ends_active_session() {
 fn test_end_command_fails_when_no_active_session() {
 	// Arrange
 	let (context, _clock, _writer) = create_test_context();
-	let command = EndCommand::new();
+	let command = EndCommand {};
 
 	// Act
 	let service = command.build_service(context);
@@ -134,7 +144,9 @@ fn test_full_session_lifecycle() {
 	let (context, _clock, writer) = create_test_context();
 
 	// Act & Assert: Start session
-	let start_command = StartCommand::new(Some(45));
+	let start_command = StartCommand {
+		duration: Some(45),
+	};
 	let start_service = start_command.build_service(context.clone());
 	assert!(start_service.run().is_ok());
 
@@ -145,7 +157,7 @@ fn test_full_session_lifecycle() {
 	writer.clear();
 
 	// Act & Assert: End session
-	let end_command = EndCommand::new();
+	let end_command = EndCommand {};
 	let end_service = end_command.build_service(context);
 	assert!(end_service.run().is_ok());
 

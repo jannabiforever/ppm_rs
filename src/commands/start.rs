@@ -9,14 +9,6 @@ pub struct StartCommand {
 	pub duration: Option<u32>,
 }
 
-impl StartCommand {
-	pub fn new(duration: Option<u32>) -> Self {
-		Self {
-			duration,
-		}
-	}
-}
-
 impl CommandHandler for StartCommand {
 	type Service = StartFocusSession;
 

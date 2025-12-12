@@ -7,12 +7,6 @@ use crate::commands::CommandHandler;
 #[derive(Args, Debug, Default)]
 pub struct EndCommand;
 
-impl EndCommand {
-	pub fn new() -> Self {
-		Default::default()
-	}
-}
-
 impl CommandHandler for EndCommand {
 	type Service = EndFocusSession;
 
