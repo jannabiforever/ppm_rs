@@ -234,15 +234,31 @@ pub struct ProjectName(pub String);
 // Generated: Display, From, AsRef, Deref, Serde transparent
 ```
 
-**WHY**: Type safety prevents mixing IDs (can't pass `TaskId` where `FocusSessionId` expected), better API semantics, refactoring safety.
+**`#[model]`** - Auto-applies standard derives for domain models:
+```rust
+use model_macros::model;
+
+#[model]
+pub struct FocusSession {
+    pub id: FocusSessionId,
+    pub start: DateTime<Utc>,
+    // ...
+}
+
+// Automatically adds: Debug, Clone, Serialize, Deserialize
+// Merges with existing derives if present
+```
+
+**WHY**: Type safety prevents mixing IDs (can't pass `TaskId` where `FocusSessionId` expected), better API semantics, refactoring safety. The `#[model]` macro ensures consistent derives across all domain models.
 
 **Usage in models**:
 ```rust
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[model]  // ✅ Use macro for consistent derives
 pub struct FocusSession {
     pub id: FocusSessionId,  // ✅ Type-safe
     pub associated_project_name: Option<ProjectName>,  // ✅ Semantic
     // NOT: pub id: String  ❌
+    // NOT: #[derive(Debug, Clone, ...)]  ❌ Use #[model] instead
 }
 ```
 

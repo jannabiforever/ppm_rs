@@ -1,5 +1,5 @@
 use chrono::{DateTime, Duration, Utc};
-use model_macros::{model_id, model_name};
+use model_macros::{model, model_id, model_name};
 use serde::{Deserialize, Serialize};
 
 pub fn gen_id() -> String {
@@ -14,7 +14,7 @@ pub struct FocusSessionId(pub String);
 #[model_name]
 pub struct ProjectName(pub String);
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[model]
 pub struct FocusSession {
 	pub id: FocusSessionId,
 	pub associated_project_name: Option<ProjectName>,
@@ -35,7 +35,7 @@ impl FocusSession {
 #[model_id(prefix = "task_", gen = crate::models::gen_id)]
 pub struct TaskId(pub String);
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[model]
 pub struct Task {
 	pub id: TaskId,
 	pub project_name: ProjectName,
@@ -54,7 +54,7 @@ pub enum TaskStatus {
 #[model_id(prefix = "note_", gen = crate::models::gen_id)]
 pub struct NoteId(pub String);
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[model]
 pub struct Note {
 	pub id: NoteId,
 	pub associated_project_name: Option<ProjectName>,

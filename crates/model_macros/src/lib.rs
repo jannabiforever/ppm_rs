@@ -1,5 +1,6 @@
 use proc_macro::TokenStream;
 
+mod model;
 mod model_id;
 mod model_name;
 
@@ -11,4 +12,9 @@ pub fn model_id(attr: TokenStream, item: TokenStream) -> TokenStream {
 #[proc_macro_attribute]
 pub fn model_name(attr: TokenStream, item: TokenStream) -> TokenStream {
 	model_name::expand(attr, item)
+}
+
+#[proc_macro_attribute]
+pub fn model(attr: TokenStream, item: TokenStream) -> TokenStream {
+	model::expand(attr, item)
 }
