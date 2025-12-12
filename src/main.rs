@@ -1,10 +1,10 @@
 mod commands;
-mod errors;
 
 use clap::{Parser, Subcommand};
 use commands::CommandHandler;
 use ppm_core::config::Config;
 use ppm_core::context::PPMContext;
+use ppm_core::errors::PPMError;
 use ppm_core::services::Service;
 
 use crate::commands::session::SessionCommand;
@@ -30,7 +30,14 @@ pub enum PPMCommand {
 /// 1. Create Command from CLI args
 /// 2. Build Service from Command (injecting dependencies via context)
 /// 3. Execute Service to perform business logic
-fn main() -> Result<(), errors::PPMCliError> {
+fn main() {
+	if let Err(e) = run() {
+		eprintln!("Error: {}", e);
+		std::process::exit(1);
+	}
+}
+
+fn run() -> Result<(), PPMError> {
 	// Load configuration
 	let config = Config::load()?;
 	config.validate()?;
