@@ -12,7 +12,13 @@ use crate::errors::{PPMError, PPMResult};
 /// Never use `println!` directly - always inject OutputWriter.
 /// Uses interior mutability (Mutex) to allow &self methods on trait objects.
 pub trait OutputWriter: Send + Sync {
+	/// Write a message.
+	///
+	/// Note: no [ppm] header should be added to message. It is added automatically.
 	fn write(&self, message: &dyn fmt::Display) -> PPMResult<()>;
+	/// Write a message followed by a newline.
+	///
+	/// Note: no [ppm] header should be added to message. It is added automatically.
 	fn write_line(&self, message: &dyn fmt::Display) -> PPMResult<()>;
 }
 
@@ -23,13 +29,13 @@ pub trait OutputWriter: Send + Sync {
 impl<W: io::Write + Send> OutputWriter for Mutex<W> {
 	fn write(&self, message: &dyn fmt::Display) -> PPMResult<()> {
 		let mut writer = self.lock().map_err(|_| PPMError::LockError)?;
-		write!(writer, "{}", message)?;
+		write!(writer, "[ppm] {}", message)?;
 		Ok(())
 	}
 
 	fn write_line(&self, message: &dyn fmt::Display) -> PPMResult<()> {
 		let mut writer = self.lock().map_err(|_| PPMError::LockError)?;
-		writeln!(writer, "{}", message)?;
+		writeln!(writer, "[ppm] {}", message)?;
 		Ok(())
 	}
 }

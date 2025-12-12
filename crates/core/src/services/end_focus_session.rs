@@ -27,7 +27,7 @@ impl EndFocusSession {
 		let now = self.clock.now();
 		self.repository.end_session(&session_id, now)?;
 
-		self.output_writer.write_line(&"[ppm] Focus session ended")?;
+		self.output_writer.write_line(&"Focus session ended")?;
 		self.output_writer.write_line(&format!("Session ID: {}", session_id))?;
 
 		Ok(())

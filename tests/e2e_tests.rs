@@ -45,7 +45,7 @@ fn test_start_command_creates_session() {
 	let output = writer.get_output();
 	assert_eq!(output.len(), 2);
 	assert_eq!(output[0], "[ppm] Focus session started");
-	assert_eq!(output[1], "Duration: 30 minutes");
+	assert_eq!(output[1], "[ppm] Duration: 30 minutes");
 }
 
 #[test]
@@ -64,7 +64,7 @@ fn test_start_command_uses_default_duration() {
 	assert!(result.is_ok());
 
 	let output = writer.get_output();
-	assert_eq!(output[1], "Duration: 60 minutes"); // default
+	assert_eq!(output[1], "[ppm] Duration: 60 minutes"); // default
 }
 
 #[test]
@@ -119,7 +119,7 @@ fn test_end_command_ends_active_session() {
 	let output = writer.get_output();
 	assert_eq!(output.len(), 2);
 	assert_eq!(output[0], "[ppm] Focus session ended");
-	assert!(output[1].starts_with("Session ID: session_"));
+	assert!(output[1].starts_with("[ppm] Session ID: session_"));
 }
 
 #[test]
@@ -152,7 +152,7 @@ fn test_full_session_lifecycle() {
 
 	let start_output = writer.get_output();
 	assert_eq!(start_output[0], "[ppm] Focus session started");
-	assert_eq!(start_output[1], "Duration: 45 minutes");
+	assert_eq!(start_output[1], "[ppm] Duration: 45 minutes");
 
 	writer.clear();
 
@@ -163,5 +163,5 @@ fn test_full_session_lifecycle() {
 
 	let end_output = writer.get_output();
 	assert_eq!(end_output[0], "[ppm] Focus session ended");
-	assert!(end_output[1].starts_with("Session ID:"));
+	assert!(end_output[1].starts_with("[ppm] Session ID:"));
 }
