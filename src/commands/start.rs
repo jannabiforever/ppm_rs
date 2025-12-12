@@ -1,8 +1,10 @@
+use clap::Args;
 use ppm_core::context::PPMContext;
 use ppm_core::services::start_focus_session::StartFocusSession;
 
 use crate::commands::CommandHandler;
 
+#[derive(Args, Debug)]
 pub struct StartCommand {
 	pub duration: Option<u32>,
 }

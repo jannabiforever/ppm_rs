@@ -17,11 +17,8 @@ pub struct PPMCli {
 
 #[derive(Subcommand, Debug)]
 pub enum PPMCommand {
-	Start {
-		#[arg(short, long)]
-		duration: Option<u32>,
-	},
-	End,
+	Start(commands::start::StartCommand),
+	End(commands::end::EndCommand),
 }
 
 /// Entry point: Load config → Assemble dependencies → Execute command
@@ -43,17 +40,11 @@ fn main() -> Result<(), errors::PPMCliError> {
 
 	// Build and execute service
 	match cli.command {
-		PPMCommand::Start {
-			duration,
-		} => {
-			let command = commands::start::StartCommand::new(duration);
-			let service = command.build_service(context);
-			service.run()?;
+		PPMCommand::Start(command) => {
+			command.build_service(context).run()?;
 		}
-		PPMCommand::End => {
-			let command = commands::end::EndCommand::new();
-			let service = command.build_service(context);
-			service.run()?;
+		PPMCommand::End(command) => {
+			command.build_service(context).run()?;
 		}
 	}
 
