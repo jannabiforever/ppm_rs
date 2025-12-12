@@ -214,9 +214,21 @@ impl Service for NewService {
 }
 ```
 
-2. Create command in `src/commands/`:
+2. Create command in `src/commands/` using clap's `Args` derive:
 ```rust
-pub struct NewCommand { /* args */ }
+use clap::Args;
+
+#[derive(Args, Debug)]
+pub struct NewCommand {
+    #[arg(short, long)]
+    pub some_arg: Option<String>,
+}
+
+impl NewCommand {
+    pub fn new(some_arg: Option<String>) -> Self {
+        Self { some_arg }
+    }
+}
 
 impl CommandHandler for NewCommand {
     type Service = NewService;
@@ -231,25 +243,26 @@ impl CommandHandler for NewCommand {
 }
 ```
 
-3. Add to CLI enum in `src/main.rs`:
+3. Add to CLI enum in `src/main.rs` (clap automatically parses Args):
 ```rust
+#[derive(Subcommand, Debug)]
 pub enum PPMCommand {
-    Start { duration: Option<u32> },
-    End,
-    New { /* args */ },  // Add here
+    Start(commands::start::StartCommand),
+    End(commands::end::EndCommand),
+    New(commands::new::NewCommand),  // Add here
 }
 ```
 
-4. Wire up in `main.rs` match statement:
+4. Wire up in `main.rs` match statement (simplified - command is already parsed):
 ```rust
-PPMCommand::New { /* args */ } => {
-    let command = commands::new::NewCommand::new(/* args */);
-    let service = command.build_service(context);
-    service.run()?;
+PPMCommand::New(command) => {
+    command.build_service(context).run()?;
 }
 ```
 
 5. Write E2E tests in `tests/e2e_tests.rs`
+
+**Note**: Commands use `#[derive(Args, Debug)]` from clap. The `new()` constructor is kept for E2E test compatibility, but clap automatically instantiates commands from CLI arguments.
 
 ## Anti-Patterns to Avoid
 
