@@ -9,14 +9,6 @@ pub struct FocusSession {
 }
 
 impl FocusSession {
-	pub fn new(id: String, start: DateTime<Utc>, end: DateTime<Utc>) -> Self {
-		Self {
-			id,
-			start,
-			end,
-		}
-	}
-
 	pub fn duration(&self) -> Duration {
 		self.end - self.start
 	}
@@ -24,13 +16,13 @@ impl FocusSession {
 	pub fn is_active(&self, now: DateTime<Utc>) -> bool {
 		now >= self.start && now <= self.end
 	}
-}
 
-/// Generate a unique session ID
-pub fn generate_session_id() -> String {
-	use std::time::{SystemTime, UNIX_EPOCH};
+	/// Generate a unique session ID
+	pub fn generate_id() -> String {
+		use std::time::{SystemTime, UNIX_EPOCH};
 
-	let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros();
+		let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros();
 
-	format!("session_{}", timestamp)
+		format!("session_{}", timestamp)
+	}
 }

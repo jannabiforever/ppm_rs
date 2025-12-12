@@ -4,7 +4,7 @@ use chrono::Duration;
 
 use crate::clock::Clock;
 use crate::errors::{PPMError, PPMResult};
-use crate::models::{FocusSession, generate_session_id};
+use crate::models::FocusSession;
 use crate::output::OutputWriter;
 use crate::repositories::SessionRepository;
 use crate::services::Service;
@@ -31,11 +31,11 @@ impl StartFocusSession {
 	fn create_new_focus_session(&self) -> PPMResult<()> {
 		let duration_seconds = self.duration_in_minutes as i64 * 60;
 		let now = self.clock.now();
-		let session = FocusSession::new(
-			generate_session_id(),
-			now,
-			now + Duration::seconds(duration_seconds),
-		);
+		let session = FocusSession {
+			id: FocusSession::generate_id(),
+			start: now,
+			end: now + Duration::seconds(duration_seconds),
+		};
 
 		self.repository.create_session(session)?;
 
