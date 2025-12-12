@@ -4,7 +4,7 @@ use std::sync::Arc;
 use crate::clock::{Clock, SystemClock};
 use crate::config::Config;
 use crate::output::{OutputWriter, stdout_writer};
-use crate::repositories::{LocalSessionRepository, SessionRepository};
+use crate::repositories::session::{LocalSessionRepository, SessionRepository};
 
 /// Dependency injection container.
 ///

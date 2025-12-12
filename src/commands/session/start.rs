@@ -1,7 +1,7 @@
 use clap::Args;
 use ppm_core::context::PPMContext;
 use ppm_core::models::ProjectName;
-use ppm_core::services::start_focus_session::StartFocusSession;
+use ppm_core::services::session::StartFocusSession;
 
 use crate::commands::CommandHandler;
 

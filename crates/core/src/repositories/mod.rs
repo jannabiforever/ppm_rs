@@ -1,5 +1,3 @@
-pub mod in_memory_repository;
-pub mod session_repository;
+pub mod session;
 
-pub use in_memory_repository::InMemorySessionRepository;
-pub use session_repository::{LocalSessionRepository, SessionRepository};
+pub use session::{InMemorySessionRepository, LocalSessionRepository, SessionRepository};

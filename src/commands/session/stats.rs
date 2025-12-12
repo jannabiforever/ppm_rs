@@ -1,6 +1,6 @@
 use clap::Args;
 use ppm_core::context::PPMContext;
-use ppm_core::services::get_session_stats::GetSessionStats;
+use ppm_core::services::session::GetSessionStats;
 
 use crate::commands::CommandHandler;
 

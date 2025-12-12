@@ -1,6 +1,6 @@
 use clap::Args;
 use ppm_core::context::PPMContext;
-use ppm_core::services::cancel_focus_session::CancelFocusSession;
+use ppm_core::services::session::CancelFocusSession;
 
 use crate::commands::CommandHandler;
 
