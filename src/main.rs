@@ -52,6 +52,10 @@ fn run() -> Result<(), PPMError> {
 	match cli.command {
 		PPMCommand::Sess(SessionCommand::Start(command)) => command.build_service(context).run(),
 		PPMCommand::Sess(SessionCommand::End(command)) => command.build_service(context).run(),
+		PPMCommand::Sess(SessionCommand::Status(command)) => command.build_service(context).run(),
+		PPMCommand::Sess(SessionCommand::Cancel(command)) => command.build_service(context).run(),
+		PPMCommand::Sess(SessionCommand::List(command)) => command.build_service(context).run(),
+		PPMCommand::Sess(SessionCommand::Stats(command)) => command.build_service(context).run(),
 	}?;
 
 	Ok(())

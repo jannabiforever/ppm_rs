@@ -37,23 +37,35 @@ impl Clock for SystemClock {
 // Test Utilities
 // --------------------------------------------------------------------------------
 
-/// Fixed clock for testing - always returns the same time.
+/// Fixed clock for testing - allows controlled time progression.
 ///
 /// Note: Not marked with #[cfg(test)] so it's accessible in integration tests.
 pub struct FixedClock {
-	time: DateTime<Utc>,
+	time: std::sync::Mutex<DateTime<Utc>>,
 }
 
 impl FixedClock {
 	pub fn new(time: DateTime<Utc>) -> Self {
 		Self {
-			time,
+			time: std::sync::Mutex::new(time),
 		}
+	}
+
+	/// Advance the clock by the specified duration
+	pub fn advance(&self, duration: chrono::Duration) {
+		let mut time = self.time.lock().unwrap();
+		*time += duration;
+	}
+
+	/// Set the clock to a specific time
+	pub fn set(&self, new_time: DateTime<Utc>) {
+		let mut time = self.time.lock().unwrap();
+		*time = new_time;
 	}
 }
 
 impl Clock for FixedClock {
 	fn now(&self) -> DateTime<Utc> {
-		self.time
+		*self.time.lock().unwrap()
 	}
 }

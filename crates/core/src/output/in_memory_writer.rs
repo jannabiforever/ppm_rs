@@ -35,17 +35,18 @@ impl Default for InMemoryWriter {
 impl OutputWriter for InMemoryWriter {
 	fn write(&self, message: &dyn fmt::Display) -> PPMResult<()> {
 		let mut lines = self.lines.lock().unwrap();
+		let formatted = format!("[ppm] {}", message);
 		if let Some(last) = lines.last_mut() {
-			last.push_str(&message.to_string());
+			last.push_str(&formatted);
 		} else {
-			lines.push(message.to_string());
+			lines.push(formatted);
 		}
 		Ok(())
 	}
 
 	fn write_line(&self, message: &dyn fmt::Display) -> PPMResult<()> {
 		let mut lines = self.lines.lock().unwrap();
-		lines.push(message.to_string());
+		lines.push(format!("[ppm] {}", message));
 		Ok(())
 	}
 }

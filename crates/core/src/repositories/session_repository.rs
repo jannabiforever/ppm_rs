@@ -15,6 +15,7 @@ pub trait SessionRepository: Send + Sync {
 	fn get_active_session(&self, current_time: DateTime<Utc>) -> PPMResult<Option<FocusSession>>;
 	fn create_session(&self, session: FocusSession) -> PPMResult<()>;
 	fn end_session(&self, session_id: &str, current_time: DateTime<Utc>) -> PPMResult<()>;
+	fn delete_session(&self, session_id: &str) -> PPMResult<()>;
 	fn list_sessions(&self) -> PPMResult<Vec<FocusSession>>;
 }
 
@@ -96,6 +97,20 @@ impl SessionRepository for LocalSessionRepository {
 		} else {
 			Err(PPMError::NoActiveSession)
 		}
+	}
+
+	fn delete_session(&self, session_id: &str) -> PPMResult<()> {
+		let mut sessions = self.load_sessions()?;
+		let initial_len = sessions.len();
+
+		sessions.retain(|s| s.id != session_id);
+
+		if sessions.len() == initial_len {
+			return Err(PPMError::NoActiveSession);
+		}
+
+		self.save_sessions(&sessions)?;
+		Ok(())
 	}
 
 	fn list_sessions(&self) -> PPMResult<Vec<FocusSession>> {

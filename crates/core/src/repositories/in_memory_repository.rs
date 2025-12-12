@@ -52,6 +52,19 @@ impl SessionRepository for InMemorySessionRepository {
 		}
 	}
 
+	fn delete_session(&self, session_id: &str) -> PPMResult<()> {
+		let mut sessions = self.sessions.lock().unwrap();
+		let initial_len = sessions.len();
+
+		sessions.retain(|s| s.id != session_id);
+
+		if sessions.len() == initial_len {
+			return Err(PPMError::NoActiveSession);
+		}
+
+		Ok(())
+	}
+
 	fn list_sessions(&self) -> PPMResult<Vec<FocusSession>> {
 		Ok(self.sessions.lock().unwrap().clone())
 	}
