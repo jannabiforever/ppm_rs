@@ -205,11 +205,73 @@ pub struct FixedClock { ... }
 pub struct FixedClock { ... }
 ```
 
+## Domain Models
+
+### Rich Model Pattern with Proc Macros
+
+The project uses procedural macros to create type-safe wrappers around primitive types, eliminating stringly-typed code:
+
+**`#[model_id]`** - Auto-generates ID types with prefix and generation logic:
+```rust
+use model_macros::model_id;
+
+#[model_id(prefix = "session_", gen = crate::models::gen_id)]
+pub struct FocusSessionId(pub String);
+
+// Generated methods:
+// - new() -> creates new ID with prefix
+// - Display, From<String>, From<&str>, AsRef<str>, Deref<Target=str>
+// - Serde transparent serialization
+```
+
+**`#[model_name]`** - Creates name wrappers for domain entities:
+```rust
+use model_macros::model_name;
+
+#[model_name]
+pub struct ProjectName(pub String);
+
+// Generated: Display, From, AsRef, Deref, Serde transparent
+```
+
+**WHY**: Type safety prevents mixing IDs (can't pass `TaskId` where `FocusSessionId` expected), better API semantics, refactoring safety.
+
+**Usage in models**:
+```rust
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FocusSession {
+    pub id: FocusSessionId,  // ✅ Type-safe
+    pub associated_project_name: Option<ProjectName>,  // ✅ Semantic
+    // NOT: pub id: String  ❌
+}
+```
+
+**Repository signatures use typed IDs**:
+```rust
+pub trait SessionRepository: Send + Sync {
+    fn end_session(&self, session_id: &FocusSessionId, ...) -> PPMResult<()>;
+    fn delete_session(&self, session_id: &FocusSessionId) -> PPMResult<()>;
+    // NOT: &str ❌
+}
+```
+
+**Creating instances**:
+```rust
+// New ID with auto-generation
+let id = FocusSessionId::new();  // Generates "session_1234567890"
+
+// From existing string (deserialization, tests)
+let id = FocusSessionId::from("session_existing");
+
+// Names from user input
+let project = ProjectName::from("my-project");
+```
+
 ## Data Storage
 
 Sessions are stored in `~/.config/ppm/sessions.json` as JSON array. The `LocalSessionRepository` handles:
 - Directory creation (`~/.config/ppm/`)
-- JSON serialization/deserialization
+- JSON serialization/deserialization (IDs serialize transparently as strings)
 - Session CRUD operations
 
 Repository methods take `current_time: DateTime<Utc>` as parameter instead of depending on Clock directly (dependency inversion).
@@ -289,6 +351,7 @@ PPMCommand::New(command) => {
 - ❌ Making repository depend on Clock (pass time as parameter instead)
 - ❌ Manual testing instead of E2E tests
 - ❌ Using `#[cfg(test)]` on utilities needed by integration tests
+- ❌ Using primitive types (`String`, `&str`) for IDs or domain names (use `#[model_id]` or `#[model_name]` instead)
 
 ## Key Files
 
@@ -296,4 +359,6 @@ PPMCommand::New(command) => {
 - `crates/core/src/context.rs` - DI container with builder pattern
 - `crates/core/src/services/mod.rs` - Service trait definition
 - `crates/core/src/repositories/session_repository.rs` - Data access abstraction
+- `crates/core/src/models/mod.rs` - Domain models with typed IDs and names
+- `crates/model_macros/` - Procedural macros for `#[model_id]` and `#[model_name]`
 - `tests/e2e_tests.rs` - End-to-end tests with in-memory mocks
