@@ -163,6 +163,22 @@ pub enum PPMError {
 }
 ```
 
+**CLI Layer Error Output**: In `main.rs`, use a separate `run()` function to display user-friendly error messages:
+```rust
+fn main() {
+    if let Err(e) = run() {
+        eprintln!("Error: {}", e);  // Uses Display from thiserror
+        std::process::exit(1);
+    }
+}
+
+fn run() -> Result<(), PPMError> {
+    // Main logic here
+}
+```
+
+**WHY**: Rust's default `main() -> Result<(), E>` uses `Debug` format (`Error: SessionAlreadyActive`), but we want `Display` format (`Error: A focus session is already active`) from `thiserror`'s `#[error(...)]` attribute.
+
 ### 5. Testing Requirements
 
 **MUST**: Write E2E tests in `tests/` directory, not manual testing
