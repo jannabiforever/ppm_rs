@@ -3,7 +3,7 @@ use std::sync::{Arc, Mutex};
 use chrono::{DateTime, Utc};
 
 use crate::errors::{PPMError, PPMResult};
-use crate::models::FocusSession;
+use crate::models::{FocusSession, FocusSessionId};
 use crate::repositories::SessionRepository;
 
 /// In-memory session repository for testing
@@ -41,10 +41,14 @@ impl SessionRepository for InMemorySessionRepository {
 		Ok(())
 	}
 
-	fn end_session(&self, session_id: &str, current_time: DateTime<Utc>) -> PPMResult<()> {
+	fn end_session(
+		&self,
+		session_id: &FocusSessionId,
+		current_time: DateTime<Utc>,
+	) -> PPMResult<()> {
 		let mut sessions = self.sessions.lock().unwrap();
 
-		if let Some(session) = sessions.iter_mut().find(|s| s.id == session_id) {
+		if let Some(session) = sessions.iter_mut().find(|s| &s.id == session_id) {
 			session.end = current_time;
 			Ok(())
 		} else {
@@ -52,11 +56,11 @@ impl SessionRepository for InMemorySessionRepository {
 		}
 	}
 
-	fn delete_session(&self, session_id: &str) -> PPMResult<()> {
+	fn delete_session(&self, session_id: &FocusSessionId) -> PPMResult<()> {
 		let mut sessions = self.sessions.lock().unwrap();
 		let initial_len = sessions.len();
 
-		sessions.retain(|s| s.id != session_id);
+		sessions.retain(|s| &s.id != session_id);
 
 		if sessions.len() == initial_len {
 			return Err(PPMError::NoActiveSession);

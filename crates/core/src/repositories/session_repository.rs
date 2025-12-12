@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use chrono::{DateTime, Utc};
 
 use crate::errors::{PPMError, PPMResult};
-use crate::models::FocusSession;
+use crate::models::{FocusSession, FocusSessionId};
 
 /// Data access abstraction for focus sessions.
 ///
@@ -14,8 +14,12 @@ use crate::models::FocusSession;
 pub trait SessionRepository: Send + Sync {
 	fn get_active_session(&self, current_time: DateTime<Utc>) -> PPMResult<Option<FocusSession>>;
 	fn create_session(&self, session: FocusSession) -> PPMResult<()>;
-	fn end_session(&self, session_id: &str, current_time: DateTime<Utc>) -> PPMResult<()>;
-	fn delete_session(&self, session_id: &str) -> PPMResult<()>;
+	fn end_session(
+		&self,
+		session_id: &FocusSessionId,
+		current_time: DateTime<Utc>,
+	) -> PPMResult<()>;
+	fn delete_session(&self, session_id: &FocusSessionId) -> PPMResult<()>;
 	fn list_sessions(&self) -> PPMResult<Vec<FocusSession>>;
 }
 
@@ -84,10 +88,14 @@ impl SessionRepository for LocalSessionRepository {
 		Ok(())
 	}
 
-	fn end_session(&self, session_id: &str, current_time: DateTime<Utc>) -> PPMResult<()> {
+	fn end_session(
+		&self,
+		session_id: &FocusSessionId,
+		current_time: DateTime<Utc>,
+	) -> PPMResult<()> {
 		let mut sessions = self.load_sessions()?;
 
-		if let Some(session) = sessions.iter_mut().find(|s| s.id == session_id) {
+		if let Some(session) = sessions.iter_mut().find(|s| &s.id == session_id) {
 			// Update end time to now
 			session.end = current_time;
 			self.save_sessions(&sessions)?;
@@ -97,11 +105,11 @@ impl SessionRepository for LocalSessionRepository {
 		}
 	}
 
-	fn delete_session(&self, session_id: &str) -> PPMResult<()> {
+	fn delete_session(&self, session_id: &FocusSessionId) -> PPMResult<()> {
 		let mut sessions = self.load_sessions()?;
 		let initial_len = sessions.len();
 
-		sessions.retain(|s| s.id != session_id);
+		sessions.retain(|s| &s.id != session_id);
 
 		if sessions.len() == initial_len {
 			return Err(PPMError::NoActiveSession);

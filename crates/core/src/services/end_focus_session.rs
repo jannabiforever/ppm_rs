@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use crate::clock::Clock;
 use crate::errors::{PPMError, PPMResult};
+use crate::models::FocusSessionId;
 use crate::output::OutputWriter;
 use crate::repositories::SessionRepository;
 use crate::services::Service;
@@ -16,14 +17,14 @@ pub struct EndFocusSession {
 }
 
 impl EndFocusSession {
-	fn get_active_session_id(&self) -> PPMResult<String> {
+	fn get_active_session_id(&self) -> PPMResult<FocusSessionId> {
 		let now = self.clock.now();
 		let session = self.repository.get_active_session(now)?.ok_or(PPMError::NoActiveSession)?;
 
 		Ok(session.id)
 	}
 
-	fn end_session(&self, session_id: String) -> PPMResult<()> {
+	fn end_session(&self, session_id: FocusSessionId) -> PPMResult<()> {
 		let now = self.clock.now();
 		self.repository.end_session(&session_id, now)?;
 
