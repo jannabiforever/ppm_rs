@@ -30,7 +30,7 @@ fn apply_model_derives(item: &mut Item) -> Result<()> {
 		}
 	};
 
-	// 강제할 derive
+	// Required derives
 	let required = [
 		parse_path("Debug"),
 		parse_path("Clone"),
@@ -55,13 +55,13 @@ fn merge_derive_attr(attr: &mut Attribute, required: &[Path]) -> Result<()> {
 		return Err(Error::new(attr.span(), "malformed derive attribute"));
 	};
 
-	// 기존 derive들 수집
+	// Collect existing derives
 	let mut existing: Vec<Path> = meta_list
 		.parse_args_with(syn::punctuated::Punctuated::<Path, syn::Token![,]>::parse_terminated)?
 		.into_iter()
 		.collect();
 
-	// 필요한 derive가 없으면 추가
+	// Add required derives if missing
 	for req in required {
 		if !existing.iter().any(|p| same_last_ident(p, req)) {
 			existing.push(req.clone());

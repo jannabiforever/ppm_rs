@@ -32,7 +32,7 @@ impl Parse for ModelIdArgs {
 		input.parse::<Token![=]>()?;
 		let r#gen: Path = input.parse()?;
 
-		// trailing comma 허용
+		// Allow trailing comma
 		let _ = input.parse::<Token![,]>();
 
 		Ok(Self {
@@ -65,8 +65,8 @@ fn expand_impl(args: ModelIdArgs, st: ItemStruct) -> Result<proc_macro2::TokenSt
 		));
 	}
 
-	// 기존 attrs는 보존하되, serde(transparent) 및 derive는 우리가 강제
-	// (사용자가 또 derive를 붙이면 중복될 수 있으니, 사용 측에선 model_id만 쓰는 것으로 합의)
+	// Preserve existing attrs, but enforce serde(transparent) and derives
+	// (Users should only use #[model_id] to avoid duplicate derives)
 	let user_attrs = filter_non_derive_attrs(&st.attrs);
 
 	let prefix = args.prefix;
@@ -160,7 +160,7 @@ fn matches_string_type(ty: &Type) -> bool {
 }
 
 fn filter_non_derive_attrs(attrs: &[Attribute]) -> Vec<Attribute> {
-	// 사용자가 붙인 문서 주석, cfg, repr 같은 건 유지
-	// derive는 우리가 강제하므로 제외
+	// Keep user attributes like doc comments, cfg, repr, etc.
+	// Exclude derive since we enforce it
 	attrs.iter().filter(|a| !a.path().is_ident("derive")).cloned().collect()
 }

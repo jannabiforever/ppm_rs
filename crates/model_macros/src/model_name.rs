@@ -4,7 +4,7 @@ use syn::spanned::Spanned;
 use syn::{Attribute, Error, ItemStruct, Result, Type, parse_macro_input};
 
 pub fn expand(attr: TokenStream, item: TokenStream) -> TokenStream {
-	// model_name은 인자 없게
+	// model_name takes no arguments
 	if !attr.is_empty() {
 		return Error::new(proc_macro2::Span::call_site(), "model_name takes no arguments")
 			.to_compile_error()
