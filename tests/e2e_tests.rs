@@ -8,8 +8,8 @@ use ppm_core::output::InMemoryWriter;
 use ppm_core::repositories::InMemorySessionRepository;
 use ppm_core::services::Service;
 use ppm_rs::commands::CommandHandler;
-use ppm_rs::commands::end::EndCommand;
-use ppm_rs::commands::start::StartCommand;
+use ppm_rs::commands::session::end::EndCommand;
+use ppm_rs::commands::session::start::StartCommand;
 
 fn create_test_context() -> (PPMContext, Arc<FixedClock>, Arc<InMemoryWriter>) {
 	let fixed_time = Utc::now();

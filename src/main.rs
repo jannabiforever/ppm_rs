@@ -7,6 +7,8 @@ use ppm_core::config::Config;
 use ppm_core::context::PPMContext;
 use ppm_core::services::Service;
 
+use crate::commands::session::SessionCommand;
+
 #[derive(Parser, Debug)]
 #[command(name = "ppm")]
 #[command(about = "Project Protocol Manager (CLI)", long_about = None)]
@@ -17,8 +19,9 @@ pub struct PPMCli {
 
 #[derive(Subcommand, Debug)]
 pub enum PPMCommand {
-	Start(commands::start::StartCommand),
-	End(commands::end::EndCommand),
+	/// Utilities for focus sessions
+	#[command(subcommand)]
+	Sess(commands::session::SessionCommand),
 }
 
 /// Entry point: Load config → Assemble dependencies → Execute command
@@ -40,13 +43,9 @@ fn main() -> Result<(), errors::PPMCliError> {
 
 	// Build and execute service
 	match cli.command {
-		PPMCommand::Start(command) => {
-			command.build_service(context).run()?;
-		}
-		PPMCommand::End(command) => {
-			command.build_service(context).run()?;
-		}
-	}
+		PPMCommand::Sess(SessionCommand::Start(command)) => command.build_service(context).run(),
+		PPMCommand::Sess(SessionCommand::End(command)) => command.build_service(context).run(),
+	}?;
 
 	Ok(())
 }

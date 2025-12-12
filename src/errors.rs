@@ -4,8 +4,5 @@ pub enum PPMCliError {
 	Io(#[from] std::io::Error),
 
 	#[error("{0}")]
-	CommandParse(#[from] clap::Error),
-
-	#[error("{0}")]
 	CoreError(#[from] ppm_core::errors::PPMError),
 }

@@ -1,5 +1,4 @@
-pub mod end;
-pub mod start;
+pub mod session;
 
 use ppm_core::context::PPMContext;
 use ppm_core::services::Service;
