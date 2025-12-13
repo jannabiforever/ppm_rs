@@ -71,7 +71,7 @@ fn run() -> Result<(), PPMError> {
 		PPMCommand::Task(TaskCommand::List(command)) => command.build_service(context).run(),
 		PPMCommand::Task(TaskCommand::Done(command)) => command.build_service(context).run(),
 
-		PPMCommand::Note(NoteCommand::Add(command)) => command.build_service(context).run(),
+		PPMCommand::Note(NoteCommand::New(command)) => command.build_service(context).run(),
 		PPMCommand::Note(NoteCommand::List(command)) => command.build_service(context).run(),
 		PPMCommand::Note(NoteCommand::Delete(command)) => command.build_service(context).run(),
 	}?;

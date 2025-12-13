@@ -7,7 +7,7 @@ pub mod list;
 #[derive(Debug, Subcommand)]
 pub enum NoteCommand {
 	/// Add a new note
-	Add(add::AddCommand),
+	New(add::AddCommand),
 	/// List notes
 	List(list::ListCommand),
 	/// Delete a note
