@@ -1,11 +1,13 @@
 use chrono::{DateTime, Utc};
 
+use crate::errors::PPMResult;
+
 /// Time abstraction to make services testable.
 ///
 /// Never use `Utc::now()` directly in services - always inject Clock.
 /// This allows tests to use FixedClock for deterministic behavior.
 pub trait Clock: Send + Sync {
-	fn now(&self) -> DateTime<Utc>;
+	fn now(&self) -> PPMResult<DateTime<Utc>>;
 }
 
 // --------------------------------------------------------------------------------
@@ -28,8 +30,8 @@ impl Default for SystemClock {
 }
 
 impl Clock for SystemClock {
-	fn now(&self) -> DateTime<Utc> {
-		Utc::now()
+	fn now(&self) -> PPMResult<DateTime<Utc>> {
+		Ok(Utc::now())
 	}
 }
 
@@ -52,20 +54,22 @@ impl FixedClock {
 	}
 
 	/// Advance the clock by the specified duration
-	pub fn advance(&self, duration: chrono::Duration) {
-		let mut time = self.time.lock().unwrap();
+	pub fn advance(&self, duration: chrono::Duration) -> PPMResult<()> {
+		let mut time = self.time.lock()?;
 		*time += duration;
+		Ok(())
 	}
 
 	/// Set the clock to a specific time
-	pub fn set(&self, new_time: DateTime<Utc>) {
-		let mut time = self.time.lock().unwrap();
+	pub fn set(&self, new_time: DateTime<Utc>) -> PPMResult<()> {
+		let mut time = self.time.lock()?;
 		*time = new_time;
+		Ok(())
 	}
 }
 
 impl Clock for FixedClock {
-	fn now(&self) -> DateTime<Utc> {
-		*self.time.lock().unwrap()
+	fn now(&self) -> PPMResult<DateTime<Utc>> {
+		Ok(*self.time.lock()?)
 	}
 }

@@ -5,7 +5,7 @@ use std::{fmt, io};
 
 pub use in_memory_writer::InMemoryWriter;
 
-use crate::errors::{PPMError, PPMResult};
+use crate::errors::PPMResult;
 
 /// Output abstraction for testability and flexibility.
 ///
@@ -28,13 +28,13 @@ pub trait OutputWriter: Send + Sync {
 
 impl<W: io::Write + Send> OutputWriter for Mutex<W> {
 	fn write(&self, message: &dyn fmt::Display) -> PPMResult<()> {
-		let mut writer = self.lock().map_err(|_| PPMError::LockError)?;
+		let mut writer = self.lock()?;
 		write!(writer, "[ppm] {}", message)?;
 		Ok(())
 	}
 
 	fn write_line(&self, message: &dyn fmt::Display) -> PPMResult<()> {
-		let mut writer = self.lock().map_err(|_| PPMError::LockError)?;
+		let mut writer = self.lock()?;
 		writeln!(writer, "[ppm] {}", message)?;
 		Ok(())
 	}

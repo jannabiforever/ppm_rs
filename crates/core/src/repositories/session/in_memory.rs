@@ -17,10 +17,6 @@ impl InMemorySessionRepository {
 			sessions: Arc::new(Mutex::new(Vec::new())),
 		}
 	}
-
-	pub fn get_all_sessions(&self) -> Vec<FocusSession> {
-		self.sessions.lock().unwrap().clone()
-	}
 }
 
 impl Default for InMemorySessionRepository {
@@ -31,12 +27,12 @@ impl Default for InMemorySessionRepository {
 
 impl SessionRepository for InMemorySessionRepository {
 	fn get_active_session(&self, current_time: DateTime<Utc>) -> PPMResult<Option<FocusSession>> {
-		let sessions = self.sessions.lock().unwrap();
+		let sessions = self.sessions.lock()?;
 		Ok(sessions.iter().find(|s| s.is_active(current_time)).cloned())
 	}
 
 	fn create_session(&self, session: FocusSession) -> PPMResult<()> {
-		let mut sessions = self.sessions.lock().unwrap();
+		let mut sessions = self.sessions.lock()?;
 		sessions.push(session);
 		Ok(())
 	}
@@ -46,7 +42,7 @@ impl SessionRepository for InMemorySessionRepository {
 		session_id: &FocusSessionId,
 		current_time: DateTime<Utc>,
 	) -> PPMResult<()> {
-		let mut sessions = self.sessions.lock().unwrap();
+		let mut sessions = self.sessions.lock()?;
 
 		if let Some(session) = sessions.iter_mut().find(|s| &s.id == session_id) {
 			session.end = current_time;
@@ -57,7 +53,7 @@ impl SessionRepository for InMemorySessionRepository {
 	}
 
 	fn delete_session(&self, session_id: &FocusSessionId) -> PPMResult<()> {
-		let mut sessions = self.sessions.lock().unwrap();
+		let mut sessions = self.sessions.lock()?;
 		let initial_len = sessions.len();
 
 		sessions.retain(|s| &s.id != session_id);
@@ -70,6 +66,6 @@ impl SessionRepository for InMemorySessionRepository {
 	}
 
 	fn list_sessions(&self) -> PPMResult<Vec<FocusSession>> {
-		Ok(self.sessions.lock().unwrap().clone())
+		Ok(self.sessions.lock()?.clone())
 	}
 }

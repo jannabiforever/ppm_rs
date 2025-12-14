@@ -98,7 +98,7 @@ impl TaskRepository for LocalTaskRepository {
 
 	fn list_tasks_by_project(&self, project_name: &ProjectName) -> PPMResult<Vec<Task>> {
 		let tasks = self.load_tasks()?;
-		Ok(tasks.into_iter().filter(|t| &t.project_name == project_name).collect())
+		Ok(tasks.into_iter().filter(|t| t.project_name.as_ref() == Some(project_name)).collect())
 	}
 
 	fn delete_task(&self, task_id: &TaskId) -> PPMResult<()> {

@@ -1,3 +1,5 @@
+use std::sync::PoisonError;
+
 #[derive(Debug, thiserror::Error)]
 pub enum PPMError {
 	#[error("A focus session is already active")]
@@ -29,6 +31,12 @@ pub enum PPMError {
 
 	#[error("{0}")]
 	SerdeJson(#[from] serde_json::Error),
+}
+
+impl<T> From<PoisonError<T>> for PPMError {
+	fn from(_: PoisonError<T>) -> Self {
+		PPMError::LockError
+	}
 }
 
 impl PartialEq for PPMError {

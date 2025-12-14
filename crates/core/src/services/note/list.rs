@@ -33,7 +33,7 @@ impl Service for ListNotes {
 		self.output_writer.write_line(&format!("{} note(s) found:", notes.len()))?;
 
 		for note in notes {
-			let project_display = match note.associated_project_name {
+			let project_display = match note.project_name {
 				Some(ref project) => format!(" ({})", project),
 				None => String::new(),
 			};

@@ -148,7 +148,7 @@ impl<W: io::Write + Send> OutputWriter for Mutex<W> { ... }
 **MUST**: Use `?` operator, never `unwrap()` in production code
 ```rust
 // ✅ Correct
-let writer = self.lock().map_err(|_| PPMError::LockError)?;
+let writer = self.lock()?;
 
 // ❌ FORBIDDEN in production
 let writer = self.lock().unwrap();

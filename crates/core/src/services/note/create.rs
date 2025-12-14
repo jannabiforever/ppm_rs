@@ -15,7 +15,7 @@ pub struct CreateNote {
 	pub session_repository: Arc<dyn SessionRepository>,
 	pub output_writer: Arc<dyn OutputWriter>,
 	pub editor: Arc<dyn Editor>,
-	pub associated_project_name: Option<ProjectName>,
+	pub project_name: Option<ProjectName>,
 }
 
 impl CreateNote {
@@ -38,11 +38,11 @@ impl Service for CreateNote {
 	type Output = ();
 
 	fn run(self) -> PPMResult<()> {
-		let current_time = self.clock.now();
+		let current_time = self.clock.now()?;
 		let note_id = NoteId::new();
 
 		// Determine project name: use provided, or fetch from active session
-		let project_name = if let Some(ref name) = self.associated_project_name {
+		let project_name = if let Some(ref name) = self.project_name {
 			Some(name.clone())
 		} else {
 			// Try to get project from active session
@@ -78,7 +78,7 @@ impl Service for CreateNote {
 
 		let note = Note {
 			id: note_id,
-			associated_project_name: project_name.clone(),
+			project_name: project_name.clone(),
 			content,
 			created_at: current_time,
 		};

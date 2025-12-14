@@ -18,7 +18,7 @@ impl Service for GetSessionStats {
 	type Output = ();
 
 	fn run(self) -> PPMResult<()> {
-		let now = self.clock.now();
+		let now = self.clock.now()?;
 		let sessions = self.repository.list_sessions()?;
 
 		if sessions.is_empty() {

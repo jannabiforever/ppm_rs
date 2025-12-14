@@ -26,7 +26,7 @@ pub struct StartFocusSession {
 
 impl StartFocusSession {
 	fn ensure_no_active_focus_session(&self) -> PPMResult<()> {
-		if self.repository.get_active_session(self.clock.now())?.is_some() {
+		if self.repository.get_active_session(self.clock.now()?)?.is_some() {
 			return Err(PPMError::SessionAlreadyActive);
 		}
 		Ok(())
@@ -34,7 +34,7 @@ impl StartFocusSession {
 
 	fn create_new_focus_session(&self) -> PPMResult<()> {
 		let duration_seconds = self.duration_in_minutes as i64 * 60;
-		let now = self.clock.now();
+		let now = self.clock.now()?;
 		let session = FocusSession {
 			id: FocusSessionId::new(),
 			start: now,

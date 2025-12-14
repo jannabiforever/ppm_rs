@@ -11,7 +11,7 @@ pub struct CreateTask {
 	pub clock: Arc<dyn Clock>,
 	pub task_repository: Arc<dyn TaskRepository>,
 	pub output_writer: Arc<dyn OutputWriter>,
-	pub project_name: ProjectName,
+	pub project_name: Option<ProjectName>,
 	pub description: String,
 }
 
@@ -24,12 +24,12 @@ impl Service for CreateTask {
 			project_name: self.project_name.clone(),
 			description: self.description.clone(),
 			status: TaskStatus::Pending,
-			created_at: self.clock.now(),
+			created_at: self.clock.now()?,
 		};
 
 		self.task_repository.create_task(task)?;
 		self.output_writer
-			.write_line(&format!("Task created for project '{}'", self.project_name))?;
+			.write_line(&format!("Task created for project '{:?}'", self.project_name))?;
 
 		Ok(())
 	}

@@ -67,7 +67,7 @@ fn run() -> Result<(), PPMError> {
 		PPMCommand::Sess(SessionCommand::List(command)) => command.build_service(context).run(),
 		PPMCommand::Sess(SessionCommand::Stats(command)) => command.build_service(context).run(),
 
-		PPMCommand::Task(TaskCommand::Add(command)) => command.build_service(context).run(),
+		PPMCommand::Task(TaskCommand::New(command)) => command.build_service(context).run(),
 		PPMCommand::Task(TaskCommand::List(command)) => command.build_service(context).run(),
 		PPMCommand::Task(TaskCommand::Done(command)) => command.build_service(context).run(),
 

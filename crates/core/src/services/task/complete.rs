@@ -27,7 +27,7 @@ impl Service for CompleteTask {
 		match task.status {
 			TaskStatus::Pending => {
 				// Update status to Done with current timestamp
-				let completed_at = self.clock.now();
+				let completed_at = self.clock.now()?;
 				self.task_repository
 					.update_task_status(&self.task_id, TaskStatus::Done(completed_at))?;
 

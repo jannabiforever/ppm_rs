@@ -16,8 +16,8 @@ impl InMemoryTaskRepository {
 		}
 	}
 
-	pub fn get_all_tasks(&self) -> Vec<Task> {
-		self.tasks.lock().unwrap().clone()
+	pub fn get_all_tasks(&self) -> PPMResult<Vec<Task>> {
+		Ok(self.tasks.lock()?.clone())
 	}
 }
 
@@ -29,18 +29,18 @@ impl Default for InMemoryTaskRepository {
 
 impl TaskRepository for InMemoryTaskRepository {
 	fn create_task(&self, task: Task) -> PPMResult<()> {
-		let mut tasks = self.tasks.lock().unwrap();
+		let mut tasks = self.tasks.lock()?;
 		tasks.push(task);
 		Ok(())
 	}
 
 	fn get_task(&self, task_id: &TaskId) -> PPMResult<Option<Task>> {
-		let tasks = self.tasks.lock().unwrap();
+		let tasks = self.tasks.lock()?;
 		Ok(tasks.iter().find(|t| &t.id == task_id).cloned())
 	}
 
 	fn update_task_status(&self, task_id: &TaskId, status: TaskStatus) -> PPMResult<()> {
-		let mut tasks = self.tasks.lock().unwrap();
+		let mut tasks = self.tasks.lock()?;
 
 		if let Some(task) = tasks.iter_mut().find(|t| &t.id == task_id) {
 			task.status = status;
@@ -51,16 +51,20 @@ impl TaskRepository for InMemoryTaskRepository {
 	}
 
 	fn list_tasks(&self) -> PPMResult<Vec<Task>> {
-		Ok(self.tasks.lock().unwrap().clone())
+		self.get_all_tasks()
 	}
 
 	fn list_tasks_by_project(&self, project_name: &ProjectName) -> PPMResult<Vec<Task>> {
-		let tasks = self.tasks.lock().unwrap();
-		Ok(tasks.iter().filter(|t| &t.project_name == project_name).cloned().collect())
+		let tasks = self.tasks.lock()?;
+		Ok(tasks
+			.iter()
+			.filter(|&t| t.project_name.as_ref() == Some(project_name))
+			.cloned()
+			.collect())
 	}
 
 	fn delete_task(&self, task_id: &TaskId) -> PPMResult<()> {
-		let mut tasks = self.tasks.lock().unwrap();
+		let mut tasks = self.tasks.lock()?;
 		let initial_len = tasks.len();
 
 		tasks.retain(|t| &t.id != task_id);

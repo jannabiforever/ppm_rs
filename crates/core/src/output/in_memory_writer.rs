@@ -16,14 +16,6 @@ impl InMemoryWriter {
 			lines: Arc::new(Mutex::new(Vec::new())),
 		}
 	}
-
-	pub fn get_output(&self) -> Vec<String> {
-		self.lines.lock().unwrap().clone()
-	}
-
-	pub fn clear(&self) {
-		self.lines.lock().unwrap().clear();
-	}
 }
 
 impl Default for InMemoryWriter {
@@ -34,7 +26,7 @@ impl Default for InMemoryWriter {
 
 impl OutputWriter for InMemoryWriter {
 	fn write(&self, message: &dyn fmt::Display) -> PPMResult<()> {
-		let mut lines = self.lines.lock().unwrap();
+		let mut lines = self.lines.lock()?;
 		let formatted = format!("[ppm] {}", message);
 		if let Some(last) = lines.last_mut() {
 			last.push_str(&formatted);
@@ -45,7 +37,7 @@ impl OutputWriter for InMemoryWriter {
 	}
 
 	fn write_line(&self, message: &dyn fmt::Display) -> PPMResult<()> {
-		let mut lines = self.lines.lock().unwrap();
+		let mut lines = self.lines.lock()?;
 		lines.push(format!("[ppm] {}", message));
 		Ok(())
 	}

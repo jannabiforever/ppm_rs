@@ -6,16 +6,16 @@ use ppm_core::services::task::CreateTask;
 use crate::commands::CommandHandler;
 
 #[derive(Args, Debug)]
-pub struct AddCommand {
+pub struct NewCommand {
 	/// Task description
 	pub description: String,
 
 	/// Project name
 	#[arg(long, short)]
-	pub project: ProjectName,
+	pub project: Option<ProjectName>,
 }
 
-impl CommandHandler for AddCommand {
+impl CommandHandler for NewCommand {
 	type Service = CreateTask;
 
 	fn build_service(self, context: PPMContext) -> Self::Service {

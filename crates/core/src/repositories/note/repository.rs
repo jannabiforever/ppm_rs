@@ -10,7 +10,6 @@ use crate::models::{Note, NoteId, ProjectName};
 pub trait NoteRepository: Send + Sync {
 	fn create_note(&self, note: Note) -> PPMResult<()>;
 	fn get_note(&self, note_id: &NoteId) -> PPMResult<Option<Note>>;
-	fn update_note_content(&self, note_id: &NoteId, content: String) -> PPMResult<()>;
 	fn list_notes(&self) -> PPMResult<Vec<Note>>;
 	fn list_notes_by_project(&self, project_name: &ProjectName) -> PPMResult<Vec<Note>>;
 	fn delete_note(&self, note_id: &NoteId) -> PPMResult<()>;
@@ -109,7 +108,7 @@ impl LocalNoteRepository {
 
 		Ok(Note {
 			id,
-			associated_project_name: project,
+			project_name: project,
 			content: body.to_string(),
 			created_at,
 		})
@@ -119,7 +118,7 @@ impl LocalNoteRepository {
 		let mut front_matter =
 			format!("---\nid: {}\ncreated_at: {}\n", note.id, note.created_at.to_rfc3339());
 
-		if let Some(ref project) = note.associated_project_name {
+		if let Some(ref project) = note.project_name {
 			front_matter.push_str(&format!("project: {}\n", project));
 		}
 
@@ -153,20 +152,6 @@ impl NoteRepository for LocalNoteRepository {
 		Ok(Some(note))
 	}
 
-	fn update_note_content(&self, note_id: &NoteId, content: String) -> PPMResult<()> {
-		let mut note = self
-			.get_note(note_id)?
-			.ok_or_else(|| PPMError::NotFound(format!("Note {} not found", note_id)))?;
-
-		note.content = content;
-
-		let file_path = self.note_file_path(note_id);
-		let file_content = self.format_note_file(&note);
-		fs::write(&file_path, file_content)?;
-
-		Ok(())
-	}
-
 	fn list_notes(&self) -> PPMResult<Vec<Note>> {
 		if !self.notes_dir.exists() {
 			return Ok(Vec::new());
@@ -194,10 +179,7 @@ impl NoteRepository for LocalNoteRepository {
 
 	fn list_notes_by_project(&self, project_name: &ProjectName) -> PPMResult<Vec<Note>> {
 		let notes = self.list_notes()?;
-		Ok(notes
-			.into_iter()
-			.filter(|n| n.associated_project_name.as_ref() == Some(project_name))
-			.collect())
+		Ok(notes.into_iter().filter(|n| n.project_name.as_ref() == Some(project_name)).collect())
 	}
 
 	fn delete_note(&self, note_id: &NoteId) -> PPMResult<()> {

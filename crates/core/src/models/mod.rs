@@ -38,7 +38,7 @@ pub struct TaskId(pub String);
 #[model]
 pub struct Task {
 	pub id: TaskId,
-	pub project_name: ProjectName,
+	pub project_name: Option<ProjectName>,
 	pub description: String,
 	pub status: TaskStatus,
 	pub created_at: DateTime<Utc>,
@@ -57,7 +57,7 @@ pub struct NoteId(pub String);
 #[model]
 pub struct Note {
 	pub id: NoteId,
-	pub associated_project_name: Option<ProjectName>,
+	pub project_name: Option<ProjectName>,
 	pub content: String,
 	pub created_at: DateTime<Utc>,
 }

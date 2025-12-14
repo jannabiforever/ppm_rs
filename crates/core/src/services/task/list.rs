@@ -58,7 +58,7 @@ impl Service for ListTasks {
 			};
 
 			self.output_writer.write_line(&format!(
-				"  {} {} - {} ({})",
+				"  {} {} - {} ({:?})",
 				status_display, task.id, task.description, task.project_name
 			))?;
 		}

@@ -15,10 +15,6 @@ impl InMemoryNoteRepository {
 			notes: Arc::new(Mutex::new(Vec::new())),
 		}
 	}
-
-	pub fn get_all_notes(&self) -> Vec<Note> {
-		self.notes.lock().unwrap().clone()
-	}
 }
 
 impl Default for InMemoryNoteRepository {
@@ -29,42 +25,31 @@ impl Default for InMemoryNoteRepository {
 
 impl NoteRepository for InMemoryNoteRepository {
 	fn create_note(&self, note: Note) -> PPMResult<()> {
-		let mut notes = self.notes.lock().unwrap();
+		let mut notes = self.notes.lock()?;
 		notes.push(note);
 		Ok(())
 	}
 
 	fn get_note(&self, note_id: &NoteId) -> PPMResult<Option<Note>> {
-		let notes = self.notes.lock().unwrap();
+		let notes = self.notes.lock()?;
 		Ok(notes.iter().find(|n| &n.id == note_id).cloned())
 	}
 
-	fn update_note_content(&self, note_id: &NoteId, content: String) -> PPMResult<()> {
-		let mut notes = self.notes.lock().unwrap();
-
-		if let Some(note) = notes.iter_mut().find(|n| &n.id == note_id) {
-			note.content = content;
-			Ok(())
-		} else {
-			Err(PPMError::NotFound(format!("Note {} not found", note_id)))
-		}
-	}
-
 	fn list_notes(&self) -> PPMResult<Vec<Note>> {
-		Ok(self.notes.lock().unwrap().clone())
+		Ok(self.notes.lock()?.clone())
 	}
 
 	fn list_notes_by_project(&self, project_name: &ProjectName) -> PPMResult<Vec<Note>> {
-		let notes = self.notes.lock().unwrap();
+		let notes = self.notes.lock()?;
 		Ok(notes
 			.iter()
-			.filter(|n| n.associated_project_name.as_ref() == Some(project_name))
+			.filter(|n| n.project_name.as_ref() == Some(project_name))
 			.cloned()
 			.collect())
 	}
 
 	fn delete_note(&self, note_id: &NoteId) -> PPMResult<()> {
-		let mut notes = self.notes.lock().unwrap();
+		let mut notes = self.notes.lock()?;
 		let initial_len = notes.len();
 
 		notes.retain(|n| &n.id != note_id);

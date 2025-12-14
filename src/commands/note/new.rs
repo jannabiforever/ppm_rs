@@ -9,7 +9,7 @@ use crate::commands::CommandHandler;
 pub struct NewCommand {
 	/// Optional project name to associate with (if not provided, uses active session's project)
 	#[arg(long, short)]
-	pub project: Option<ProjectName>,
+	pub project_name: Option<ProjectName>,
 }
 
 impl CommandHandler for NewCommand {
@@ -22,7 +22,7 @@ impl CommandHandler for NewCommand {
 			session_repository: context.session_repository.clone(),
 			output_writer: context.output_writer.clone(),
 			editor: context.editor.clone(),
-			associated_project_name: self.project,
+			project_name: self.project_name,
 		}
 	}
 }
