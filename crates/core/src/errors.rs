@@ -17,6 +17,9 @@ pub enum PPMError {
 	#[error("{0}")]
 	NotFound(String),
 
+	#[error("{0}")]
+	AlreadyExists(String),
+
 	#[error("Configuration error: {0}")]
 	ConfigError(String),
 

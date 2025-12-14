@@ -8,6 +8,7 @@ pub struct Config {
 	pub session_storage_path: String,
 	pub task_storage_path: String,
 	pub notes_dir: String,
+	pub projects_storage_path: String,
 }
 
 impl Config {
@@ -35,12 +36,14 @@ impl Default for Config {
 		let session_storage_path = format!("{}/.config/ppm/sessions.json", home);
 		let task_storage_path = format!("{}/.config/ppm/tasks.json", home);
 		let notes_dir = format!("{}/.config/ppm/notes", home);
+		let projects_storage_path = format!("{}/.config/ppm/projects.json", home);
 
 		Self {
 			default_focus_duration_in_minutes: 60,
 			session_storage_path,
 			task_storage_path,
 			notes_dir,
+			projects_storage_path,
 		}
 	}
 }

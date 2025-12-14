@@ -1,6 +1,5 @@
 use chrono::{DateTime, Duration, Utc};
 use model_macros::{model, model_id, model_name};
-use serde::{Deserialize, Serialize};
 
 pub fn gen_id() -> String {
 	use std::time::{SystemTime, UNIX_EPOCH};
@@ -13,6 +12,20 @@ pub struct FocusSessionId(pub String);
 
 #[model_name]
 pub struct ProjectName(pub String);
+
+#[model]
+pub struct Project {
+	pub name: ProjectName,
+	pub description: String,
+	pub created_at: DateTime<Utc>,
+	pub status: ProjectStatus,
+}
+
+#[model]
+pub enum ProjectStatus {
+	Active,
+	Inactive,
+}
 
 #[model]
 pub struct FocusSession {
@@ -44,7 +57,7 @@ pub struct Task {
 	pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[model]
 pub enum TaskStatus {
 	Pending,
 	Done(DateTime<Utc>),

@@ -1,4 +1,5 @@
 pub mod note;
+pub mod project;
 pub mod session;
 pub mod task;
 

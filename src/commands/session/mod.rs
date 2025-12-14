@@ -2,12 +2,12 @@ use clap::Subcommand;
 
 use crate::commands::CommandHandler;
 
-pub mod cancel;
-pub mod end;
-pub mod list;
-pub mod start;
-pub mod stats;
-pub mod status;
+mod cancel;
+mod end;
+mod list;
+mod start;
+mod stats;
+mod status;
 
 #[derive(Debug, Subcommand)]
 pub enum SessionCommand {

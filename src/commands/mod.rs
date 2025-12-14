@@ -1,6 +1,7 @@
-pub mod note;
-pub mod session;
-pub mod task;
+mod note;
+mod project;
+mod session;
+mod task;
 
 use clap::{Subcommand, command};
 use ppm_core::context::PPMContext;
@@ -19,6 +20,10 @@ pub enum PPMCommand {
 	/// Note management
 	#[command(subcommand)]
 	Note(note::NoteCommand),
+
+	/// Project management
+	#[command(subcommand)]
+	Project(project::ProjectCommand),
 }
 
 impl CommandHandler for PPMCommand {
@@ -27,6 +32,7 @@ impl CommandHandler for PPMCommand {
 			Self::Sess(c) => c.build_service(context),
 			Self::Task(c) => c.build_service(context),
 			Self::Note(c) => c.build_service(context),
+			Self::Project(c) => c.build_service(context),
 		}
 	}
 }
