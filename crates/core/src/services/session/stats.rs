@@ -15,9 +15,7 @@ pub struct GetSessionStats {
 }
 
 impl Service for GetSessionStats {
-	type Output = ();
-
-	fn run(self) -> PPMResult<()> {
+	fn run(&self) -> PPMResult<()> {
 		let now = self.clock.now()?;
 		let sessions = self.repository.list_sessions()?;
 

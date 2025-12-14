@@ -68,8 +68,7 @@ The context is cloneable (cheap Arc clones) and passed to command handlers.
 
 ```rust
 pub trait CommandHandler {
-    type Service: Service<Output = ()>;
-    fn build_service(self, context: PPMContext) -> Self::Service;
+    fn build_service(self, context: PPMContext) -> Box<dyn Service>;
 }
 ```
 
@@ -111,8 +110,8 @@ impl StartFocusSession {
 **DO**: Implement `Service` trait directly on concrete types
 ```rust
 impl Service for StartFocusSession {
-    type Output = ();
-    fn run(self) -> PPMResult<()> { ... }
+    
+    fn run(&self) -> PPMResult<()> { ... }
 }
 ```
 
@@ -303,8 +302,8 @@ pub struct NewService {
 }
 
 impl Service for NewService {
-    type Output = ();
-    fn run(self) -> PPMResult<()> { ... }
+    
+    fn run(&self) -> PPMResult<()> { ... }
 }
 ```
 
@@ -325,9 +324,9 @@ impl NewCommand {
 }
 
 impl CommandHandler for NewCommand {
-    type Service = NewService;
     
-    fn build_service(self, context: PPMContext) -> Self::Service {
+    
+    fn build_service(self, context: PPMContext) -> Box<dyn Service> {
         NewService {
             clock: context.clock.clone(),
             repository: context.session_repository.clone(),

@@ -1,5 +1,6 @@
 use clap::Args;
 use ppm_core::context::PPMContext;
+use ppm_core::services::Service;
 use ppm_core::services::session::ListSessions;
 
 use crate::commands::CommandHandler;
@@ -20,14 +21,12 @@ impl ListCommand {
 }
 
 impl CommandHandler for ListCommand {
-	type Service = ListSessions;
-
-	fn build_service(self, context: PPMContext) -> Self::Service {
-		ListSessions {
+	fn build_service(self, context: PPMContext) -> Box<dyn Service> {
+		Box::new(ListSessions {
 			clock: context.clock.clone(),
 			repository: context.session_repository.clone(),
 			output_writer: context.output_writer.clone(),
 			limit: self.limit,
-		}
+		})
 	}
 }

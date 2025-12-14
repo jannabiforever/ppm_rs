@@ -1,6 +1,7 @@
 use clap::Args;
 use ppm_core::context::PPMContext;
 use ppm_core::models::ProjectName;
+use ppm_core::services::Service;
 use ppm_core::services::task::CreateTask;
 
 use crate::commands::CommandHandler;
@@ -16,15 +17,13 @@ pub struct NewCommand {
 }
 
 impl CommandHandler for NewCommand {
-	type Service = CreateTask;
-
-	fn build_service(self, context: PPMContext) -> Self::Service {
-		CreateTask {
+	fn build_service(self, context: PPMContext) -> Box<dyn Service> {
+		Box::new(CreateTask {
 			clock: context.clock.clone(),
 			task_repository: context.task_repository.clone(),
 			output_writer: context.output_writer.clone(),
 			project_name: self.project,
 			description: self.description,
-		}
+		})
 	}
 }

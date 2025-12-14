@@ -1,15 +1,12 @@
 mod commands;
 
-use clap::{Parser, Subcommand};
+use clap::Parser;
 use commands::CommandHandler;
 use ppm_core::config::Config;
 use ppm_core::context::PPMContext;
 use ppm_core::errors::PPMError;
-use ppm_core::services::Service;
 
-use crate::commands::note::NoteCommand;
-use crate::commands::session::SessionCommand;
-use crate::commands::task::TaskCommand;
+use crate::commands::PPMCommand;
 
 #[derive(Parser, Debug)]
 #[command(name = "ppm")]
@@ -17,21 +14,6 @@ use crate::commands::task::TaskCommand;
 pub struct PPMCli {
 	#[command(subcommand)]
 	pub command: PPMCommand,
-}
-
-#[derive(Subcommand, Debug)]
-pub enum PPMCommand {
-	/// Utilities for focus sessions
-	#[command(subcommand)]
-	Sess(commands::session::SessionCommand),
-
-	/// Task management
-	#[command(subcommand)]
-	Task(commands::task::TaskCommand),
-
-	/// Note management
-	#[command(subcommand)]
-	Note(commands::note::NoteCommand),
 }
 
 /// Entry point: Load config → Assemble dependencies → Execute command
@@ -59,22 +41,7 @@ fn run() -> Result<(), PPMError> {
 	let cli = PPMCli::parse();
 
 	// Build and execute service
-	match cli.command {
-		PPMCommand::Sess(SessionCommand::Start(command)) => command.build_service(context).run(),
-		PPMCommand::Sess(SessionCommand::End(command)) => command.build_service(context).run(),
-		PPMCommand::Sess(SessionCommand::Status(command)) => command.build_service(context).run(),
-		PPMCommand::Sess(SessionCommand::Cancel(command)) => command.build_service(context).run(),
-		PPMCommand::Sess(SessionCommand::List(command)) => command.build_service(context).run(),
-		PPMCommand::Sess(SessionCommand::Stats(command)) => command.build_service(context).run(),
-
-		PPMCommand::Task(TaskCommand::New(command)) => command.build_service(context).run(),
-		PPMCommand::Task(TaskCommand::List(command)) => command.build_service(context).run(),
-		PPMCommand::Task(TaskCommand::Done(command)) => command.build_service(context).run(),
-
-		PPMCommand::Note(NoteCommand::New(command)) => command.build_service(context).run(),
-		PPMCommand::Note(NoteCommand::List(command)) => command.build_service(context).run(),
-		PPMCommand::Note(NoteCommand::Delete(command)) => command.build_service(context).run(),
-	}?;
+	cli.command.build_service(context).run()?;
 
 	Ok(())
 }

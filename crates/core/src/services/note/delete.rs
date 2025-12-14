@@ -13,9 +13,7 @@ pub struct DeleteNote {
 }
 
 impl Service for DeleteNote {
-	type Output = ();
-
-	fn run(self) -> PPMResult<()> {
+	fn run(&self) -> PPMResult<()> {
 		self.note_repository.delete_note(&self.note_id)?;
 		self.output_writer.write_line(&format!("Note {} deleted", self.note_id))?;
 

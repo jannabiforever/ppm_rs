@@ -2,15 +2,39 @@ pub mod note;
 pub mod session;
 pub mod task;
 
+use clap::{Subcommand, command};
 use ppm_core::context::PPMContext;
 use ppm_core::services::Service;
+
+#[derive(Subcommand, Debug)]
+pub enum PPMCommand {
+	/// Utilities for focus sessions
+	#[command(subcommand)]
+	Sess(session::SessionCommand),
+
+	/// Task management
+	#[command(subcommand)]
+	Task(task::TaskCommand),
+
+	/// Note management
+	#[command(subcommand)]
+	Note(note::NoteCommand),
+}
+
+impl CommandHandler for PPMCommand {
+	fn build_service(self, context: PPMContext) -> Box<dyn Service> {
+		match self {
+			Self::Sess(c) => c.build_service(context),
+			Self::Task(c) => c.build_service(context),
+			Self::Note(c) => c.build_service(context),
+		}
+	}
+}
 
 /// Command layer pattern - builds services from context.
 ///
 /// Commands act as factories: they receive PPMContext and construct
 /// the appropriate Service with dependencies. Execution happens in main.rs.
 pub trait CommandHandler {
-	type Service: Service<Output = ()>;
-
-	fn build_service(self, context: PPMContext) -> Self::Service;
+	fn build_service(self, context: PPMContext) -> Box<dyn Service>;
 }

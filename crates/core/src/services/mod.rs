@@ -9,7 +9,5 @@ use crate::errors::PPMResult;
 /// Services are created by CommandHandlers and executed in main.rs.
 /// They encapsulate business logic and orchestrate dependencies.
 pub trait Service {
-	type Output;
-
-	fn run(self) -> PPMResult<Self::Output>;
+	fn run(&self) -> PPMResult<()>;
 }

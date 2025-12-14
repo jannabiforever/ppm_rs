@@ -12,9 +12,7 @@ pub struct ListNotes {
 }
 
 impl Service for ListNotes {
-	type Output = ();
-
-	fn run(self) -> PPMResult<()> {
+	fn run(&self) -> PPMResult<()> {
 		let mut notes = self.note_repository.list_notes()?;
 
 		// Sort by created_at descending (newest first)

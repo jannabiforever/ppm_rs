@@ -57,9 +57,7 @@ impl StartFocusSession {
 }
 
 impl Service for StartFocusSession {
-	type Output = ();
-
-	fn run(self) -> PPMResult<Self::Output> {
+	fn run(&self) -> PPMResult<()> {
 		self.ensure_no_active_focus_session()?;
 		self.create_new_focus_session()?;
 		Ok(())

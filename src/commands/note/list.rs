@@ -1,5 +1,6 @@
 use clap::Args;
 use ppm_core::context::PPMContext;
+use ppm_core::services::Service;
 use ppm_core::services::note::ListNotes;
 
 use crate::commands::CommandHandler;
@@ -12,13 +13,11 @@ pub struct ListCommand {
 }
 
 impl CommandHandler for ListCommand {
-	type Service = ListNotes;
-
-	fn build_service(self, context: PPMContext) -> Self::Service {
-		ListNotes {
+	fn build_service(self, context: PPMContext) -> Box<dyn Service> {
+		Box::new(ListNotes {
 			note_repository: context.note_repository.clone(),
 			output_writer: context.output_writer.clone(),
 			limit: self.limit,
-		}
+		})
 	}
 }

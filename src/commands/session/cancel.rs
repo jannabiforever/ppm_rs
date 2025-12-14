@@ -1,5 +1,6 @@
 use clap::Args;
 use ppm_core::context::PPMContext;
+use ppm_core::services::Service;
 use ppm_core::services::session::CancelFocusSession;
 
 use crate::commands::CommandHandler;
@@ -14,13 +15,11 @@ impl CancelCommand {
 }
 
 impl CommandHandler for CancelCommand {
-	type Service = CancelFocusSession;
-
-	fn build_service(self, context: PPMContext) -> Self::Service {
-		CancelFocusSession {
+	fn build_service(self, context: PPMContext) -> Box<dyn Service> {
+		Box::new(CancelFocusSession {
 			clock: context.clock.clone(),
 			repository: context.session_repository.clone(),
 			output_writer: context.output_writer.clone(),
-		}
+		})
 	}
 }

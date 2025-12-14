@@ -1,5 +1,6 @@
 use clap::Args;
 use ppm_core::context::PPMContext;
+use ppm_core::services::Service;
 use ppm_core::services::task::{ListTasks, TaskFilter};
 
 use crate::commands::CommandHandler;
@@ -20,9 +21,7 @@ pub struct ListCommand {
 }
 
 impl CommandHandler for ListCommand {
-	type Service = ListTasks;
-
-	fn build_service(self, context: PPMContext) -> Self::Service {
+	fn build_service(self, context: PPMContext) -> Box<dyn Service> {
 		let filter = if self.pending {
 			Some(TaskFilter::Pending)
 		} else if self.done {
@@ -33,10 +32,10 @@ impl CommandHandler for ListCommand {
 			Some(TaskFilter::All)
 		};
 
-		ListTasks {
+		Box::new(ListTasks {
 			task_repository: context.task_repository.clone(),
 			output_writer: context.output_writer.clone(),
 			filter,
-		}
+		})
 	}
 }

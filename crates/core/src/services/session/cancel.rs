@@ -13,9 +13,7 @@ pub struct CancelFocusSession {
 }
 
 impl Service for CancelFocusSession {
-	type Output = ();
-
-	fn run(self) -> PPMResult<()> {
+	fn run(&self) -> PPMResult<()> {
 		let now = self.clock.now()?;
 		let active_session = self.repository.get_active_session(now)?;
 

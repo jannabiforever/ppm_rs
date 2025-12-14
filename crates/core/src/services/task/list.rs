@@ -21,9 +21,7 @@ pub enum TaskFilter {
 }
 
 impl Service for ListTasks {
-	type Output = ();
-
-	fn run(self) -> PPMResult<()> {
+	fn run(&self) -> PPMResult<()> {
 		let mut tasks = self.task_repository.list_tasks()?;
 
 		// Sort by created_at descending (newest first)

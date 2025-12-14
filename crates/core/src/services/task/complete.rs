@@ -15,9 +15,7 @@ pub struct CompleteTask {
 }
 
 impl Service for CompleteTask {
-	type Output = ();
-
-	fn run(self) -> PPMResult<()> {
+	fn run(&self) -> PPMResult<()> {
 		// Validate task exists and is pending
 		let task = self
 			.task_repository

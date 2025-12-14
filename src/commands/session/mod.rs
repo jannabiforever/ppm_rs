@@ -1,5 +1,7 @@
 use clap::Subcommand;
 
+use crate::commands::CommandHandler;
+
 pub mod cancel;
 pub mod end;
 pub mod list;
@@ -21,4 +23,20 @@ pub enum SessionCommand {
 	List(list::ListCommand),
 	/// Show focus session statistics.
 	Stats(stats::StatsCommand),
+}
+
+impl CommandHandler for SessionCommand {
+	fn build_service(
+		self,
+		context: ppm_core::context::PPMContext,
+	) -> Box<dyn ppm_core::services::Service> {
+		match self {
+			SessionCommand::Start(c) => c.build_service(context),
+			SessionCommand::End(c) => c.build_service(context),
+			SessionCommand::Status(c) => c.build_service(context),
+			SessionCommand::Cancel(c) => c.build_service(context),
+			SessionCommand::List(c) => c.build_service(context),
+			SessionCommand::Stats(c) => c.build_service(context),
+		}
+	}
 }

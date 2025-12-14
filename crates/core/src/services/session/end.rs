@@ -36,9 +36,7 @@ impl EndFocusSession {
 }
 
 impl Service for EndFocusSession {
-	type Output = ();
-
-	fn run(self) -> PPMResult<Self::Output> {
+	fn run(&self) -> PPMResult<()> {
 		let session_id = self.get_active_session_id()?;
 		self.end_session(session_id)?;
 		Ok(())

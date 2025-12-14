@@ -16,9 +16,7 @@ pub struct CreateTask {
 }
 
 impl Service for CreateTask {
-	type Output = ();
-
-	fn run(self) -> PPMResult<()> {
+	fn run(&self) -> PPMResult<()> {
 		let task = Task {
 			id: TaskId::new(),
 			project_name: self.project_name.clone(),

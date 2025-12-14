@@ -1,6 +1,7 @@
 use clap::Args;
 use ppm_core::context::PPMContext;
 use ppm_core::models::ProjectName;
+use ppm_core::services::Service;
 use ppm_core::services::session::StartFocusSession;
 
 use crate::commands::CommandHandler;
@@ -15,10 +16,8 @@ pub struct StartCommand {
 }
 
 impl CommandHandler for StartCommand {
-	type Service = StartFocusSession;
-
-	fn build_service(self, context: PPMContext) -> Self::Service {
-		StartFocusSession {
+	fn build_service(self, context: PPMContext) -> Box<dyn Service> {
+		Box::new(StartFocusSession {
 			clock: context.clock.clone(),
 			repository: context.session_repository.clone(),
 			output_writer: context.output_writer.clone(),
@@ -26,6 +25,6 @@ impl CommandHandler for StartCommand {
 				.duration
 				.unwrap_or(context.config.default_focus_duration_in_minutes),
 			associated_project_name: self.associated_project_name,
-		}
+		})
 	}
 }

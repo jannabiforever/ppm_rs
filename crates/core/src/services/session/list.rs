@@ -16,9 +16,7 @@ pub struct ListSessions {
 }
 
 impl Service for ListSessions {
-	type Output = ();
-
-	fn run(self) -> PPMResult<()> {
+	fn run(&self) -> PPMResult<()> {
 		let now = self.clock.now()?;
 		let mut sessions = self.repository.list_sessions()?;
 

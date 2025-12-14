@@ -35,9 +35,7 @@ impl CreateNote {
 }
 
 impl Service for CreateNote {
-	type Output = ();
-
-	fn run(self) -> PPMResult<()> {
+	fn run(&self) -> PPMResult<()> {
 		let current_time = self.clock.now()?;
 		let note_id = NoteId::new();
 
