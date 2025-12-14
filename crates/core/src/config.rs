@@ -7,7 +7,7 @@ pub struct Config {
 	pub default_focus_duration_in_minutes: u32,
 	pub session_storage_path: String,
 	pub task_storage_path: String,
-	pub note_storage_path: String,
+	pub notes_dir: String,
 }
 
 impl Config {
@@ -34,13 +34,13 @@ impl Default for Config {
 		let home = std::env::var("HOME").unwrap_or_else(|_| String::from("."));
 		let session_storage_path = format!("{}/.config/ppm/sessions.json", home);
 		let task_storage_path = format!("{}/.config/ppm/tasks.json", home);
-		let note_storage_path = format!("{}/.config/ppm/notes.json", home);
+		let notes_dir = format!("{}/.config/ppm/notes", home);
 
 		Self {
 			default_focus_duration_in_minutes: 60,
 			session_storage_path,
 			task_storage_path,
-			note_storage_path,
+			notes_dir,
 		}
 	}
 }

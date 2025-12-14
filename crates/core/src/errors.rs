@@ -24,6 +24,9 @@ pub enum PPMError {
 	#[error("Failed to acquire output writer lock")]
 	LockError,
 
+	#[error("Editor error: {0}")]
+	EditorError(String),
+
 	#[error("{0}")]
 	SerdeJson(#[from] serde_json::Error),
 }

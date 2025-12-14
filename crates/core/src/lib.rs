@@ -1,6 +1,7 @@
 pub mod clock;
 pub mod config;
 pub mod context;
+pub mod editor;
 pub mod errors;
 pub mod models;
 pub mod output;

@@ -7,10 +7,7 @@ use crate::commands::CommandHandler;
 
 #[derive(Args, Debug)]
 pub struct NewCommand {
-	/// Note content
-	pub content: String,
-
-	/// Optional project name to associate with
+	/// Optional project name to associate with (if not provided, uses active session's project)
 	#[arg(long, short)]
 	pub project: Option<ProjectName>,
 }
@@ -22,8 +19,9 @@ impl CommandHandler for NewCommand {
 		CreateNote {
 			clock: context.clock.clone(),
 			note_repository: context.note_repository.clone(),
+			session_repository: context.session_repository.clone(),
 			output_writer: context.output_writer.clone(),
-			content: self.content,
+			editor: context.editor.clone(),
 			associated_project_name: self.project,
 		}
 	}

@@ -3,6 +3,7 @@ use std::sync::Arc;
 
 use crate::clock::{Clock, SystemClock};
 use crate::config::Config;
+use crate::editor::{Editor, SystemEditor};
 use crate::output::{OutputWriter, stdout_writer};
 use crate::repositories::note::{LocalNoteRepository, NoteRepository};
 use crate::repositories::session::{LocalSessionRepository, SessionRepository};
@@ -20,6 +21,7 @@ pub struct PPMContext {
 	pub task_repository: Arc<dyn TaskRepository>,
 	pub note_repository: Arc<dyn NoteRepository>,
 	pub output_writer: Arc<dyn OutputWriter>,
+	pub editor: Arc<dyn Editor>,
 }
 
 impl PPMContext {
@@ -27,15 +29,16 @@ impl PPMContext {
 		let clock = Arc::new(SystemClock::new());
 		let session_storage_path = PathBuf::from(&config.session_storage_path);
 		let task_storage_path = PathBuf::from(&config.task_storage_path);
-		let note_storage_path = PathBuf::from(&config.note_storage_path);
+		let notes_dir = PathBuf::from(&config.notes_dir);
 
 		Self {
 			config,
 			clock: clock.clone(),
 			session_repository: Arc::new(LocalSessionRepository::new(session_storage_path)),
 			task_repository: Arc::new(LocalTaskRepository::new(task_storage_path)),
-			note_repository: Arc::new(LocalNoteRepository::new(note_storage_path)),
+			note_repository: Arc::new(LocalNoteRepository::new(notes_dir)),
 			output_writer: Arc::new(stdout_writer()),
+			editor: Arc::new(SystemEditor::new()),
 		}
 	}
 
@@ -56,6 +59,7 @@ pub struct PPMContextBuilder {
 	task_repository: Option<Arc<dyn TaskRepository>>,
 	note_repository: Option<Arc<dyn NoteRepository>>,
 	output_writer: Option<Arc<dyn OutputWriter>>,
+	editor: Option<Arc<dyn Editor>>,
 }
 
 impl PPMContextBuilder {
@@ -89,12 +93,17 @@ impl PPMContextBuilder {
 		self
 	}
 
+	pub fn editor(mut self, editor: Arc<dyn Editor>) -> Self {
+		self.editor = Some(editor);
+		self
+	}
+
 	pub fn build(self) -> PPMContext {
 		let config = self.config.unwrap_or_default();
 		let clock = self.clock.unwrap_or_else(|| Arc::new(SystemClock::new()));
 		let session_storage_path = PathBuf::from(&config.session_storage_path);
 		let task_storage_path = PathBuf::from(&config.task_storage_path);
-		let note_storage_path = PathBuf::from(&config.note_storage_path);
+		let notes_dir = PathBuf::from(&config.notes_dir);
 
 		PPMContext {
 			config,
@@ -107,8 +116,9 @@ impl PPMContextBuilder {
 				.unwrap_or_else(|| Arc::new(LocalTaskRepository::new(task_storage_path))),
 			note_repository: self
 				.note_repository
-				.unwrap_or_else(|| Arc::new(LocalNoteRepository::new(note_storage_path))),
+				.unwrap_or_else(|| Arc::new(LocalNoteRepository::new(notes_dir))),
 			output_writer: self.output_writer.unwrap_or_else(|| Arc::new(stdout_writer())),
+			editor: self.editor.unwrap_or_else(|| Arc::new(SystemEditor::new())),
 		}
 	}
 }

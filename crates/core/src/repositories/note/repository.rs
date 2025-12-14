@@ -1,6 +1,7 @@
-use std::fs::{self, OpenOptions};
-use std::io::{BufReader, BufWriter, Write};
+use std::fs;
 use std::path::PathBuf;
+
+use chrono::{DateTime, Utc};
 
 use crate::errors::{PPMError, PPMResult};
 use crate::models::{Note, NoteId, ProjectName};
@@ -19,85 +20,180 @@ pub trait NoteRepository: Send + Sync {
 // Concrete Implementations
 // --------------------------------------------------------------------------------
 
-/// File-based note repository storing data in JSON format.
+/// Markdown-based note repository storing each note as a separate file.
+///
+/// Each note is stored as `{notes_dir}/{note_id}.md` with YAML front matter:
+/// ```markdown
+/// ---
+/// id: note_1234567890
+/// project: my-project
+/// created_at: 2025-12-13T10:30:00Z
+/// ---
+///
+/// # Note content in markdown
+/// ```
 pub struct LocalNoteRepository {
-	storage_path: PathBuf,
+	notes_dir: PathBuf,
 }
 
 impl LocalNoteRepository {
-	pub fn new(storage_path: PathBuf) -> Self {
+	pub fn new(notes_dir: PathBuf) -> Self {
 		Self {
-			storage_path,
+			notes_dir,
 		}
 	}
 
-	fn ensure_storage_dir(&self) -> PPMResult<()> {
-		if let Some(parent) = self.storage_path.parent() {
-			fs::create_dir_all(parent)?;
-		}
+	fn ensure_notes_dir(&self) -> PPMResult<()> {
+		fs::create_dir_all(&self.notes_dir)?;
 		Ok(())
 	}
 
-	fn load_notes(&self) -> PPMResult<Vec<Note>> {
-		if !self.storage_path.exists() {
-			return Ok(Vec::new());
-		}
-
-		let file = fs::File::open(&self.storage_path)?;
-		let reader = BufReader::new(file);
-		let notes: Vec<Note> = serde_json::from_reader(reader)
-			.map_err(|e| std::io::Error::other(format!("Failed to parse notes: {}", e)))?;
-
-		Ok(notes)
+	fn note_file_path(&self, note_id: &NoteId) -> PathBuf {
+		self.notes_dir.join(format!("{}.md", note_id.as_ref()))
 	}
 
-	fn save_notes(&self, notes: &[Note]) -> PPMResult<()> {
-		self.ensure_storage_dir()?;
+	fn parse_note_file(&self, content: &str) -> PPMResult<Note> {
+		// Split front matter and body
+		let parts: Vec<&str> = content.splitn(3, "---").collect();
 
-		let file =
-			OpenOptions::new().write(true).create(true).truncate(true).open(&self.storage_path)?;
+		if parts.len() < 3 {
+			return Err(PPMError::IoError(std::io::Error::other(
+				"Invalid note format: missing front matter",
+			)));
+		}
 
-		let mut writer = BufWriter::new(file);
-		serde_json::to_writer_pretty(&mut writer, notes)
-			.map_err(|e| std::io::Error::other(format!("Failed to write notes: {}", e)))?;
+		let front_matter = parts[1].trim();
+		let body = parts[2].trim();
 
-		writer.flush()?;
+		// Parse YAML front matter manually (simple key: value format)
+		let mut id: Option<NoteId> = None;
+		let mut project: Option<ProjectName> = None;
+		let mut created_at: Option<DateTime<Utc>> = None;
 
-		Ok(())
+		for line in front_matter.lines() {
+			let line = line.trim();
+			if let Some((key, value)) = line.split_once(':') {
+				let key = key.trim();
+				let value = value.trim();
+
+				match key {
+					"id" => id = Some(NoteId::from(value)),
+					"project" => {
+						if !value.is_empty() {
+							project = Some(ProjectName::from(value));
+						}
+					}
+					"created_at" => {
+						created_at = Some(
+							DateTime::parse_from_rfc3339(value)
+								.map_err(|e| {
+									PPMError::IoError(std::io::Error::other(format!(
+										"Failed to parse date: {}",
+										e
+									)))
+								})?
+								.with_timezone(&Utc),
+						);
+					}
+					_ => {} // Ignore unknown fields
+				}
+			}
+		}
+
+		let id = id.ok_or_else(|| {
+			PPMError::IoError(std::io::Error::other("Missing 'id' in front matter"))
+		})?;
+		let created_at = created_at.ok_or_else(|| {
+			PPMError::IoError(std::io::Error::other("Missing 'created_at' in front matter"))
+		})?;
+
+		Ok(Note {
+			id,
+			associated_project_name: project,
+			content: body.to_string(),
+			created_at,
+		})
+	}
+
+	fn format_note_file(&self, note: &Note) -> String {
+		let mut front_matter =
+			format!("---\nid: {}\ncreated_at: {}\n", note.id, note.created_at.to_rfc3339());
+
+		if let Some(ref project) = note.associated_project_name {
+			front_matter.push_str(&format!("project: {}\n", project));
+		}
+
+		front_matter.push_str("---\n\n");
+		front_matter.push_str(&note.content);
+
+		front_matter
 	}
 }
 
 impl NoteRepository for LocalNoteRepository {
 	fn create_note(&self, note: Note) -> PPMResult<()> {
-		let mut notes = self.load_notes()?;
-		notes.push(note);
-		self.save_notes(&notes)?;
+		self.ensure_notes_dir()?;
+
+		let file_path = self.note_file_path(&note.id);
+		let content = self.format_note_file(&note);
+
+		fs::write(&file_path, content)?;
 		Ok(())
 	}
 
 	fn get_note(&self, note_id: &NoteId) -> PPMResult<Option<Note>> {
-		let notes = self.load_notes()?;
-		Ok(notes.into_iter().find(|n| &n.id == note_id))
+		let file_path = self.note_file_path(note_id);
+
+		if !file_path.exists() {
+			return Ok(None);
+		}
+
+		let content = fs::read_to_string(&file_path)?;
+		let note = self.parse_note_file(&content)?;
+		Ok(Some(note))
 	}
 
 	fn update_note_content(&self, note_id: &NoteId, content: String) -> PPMResult<()> {
-		let mut notes = self.load_notes()?;
+		let mut note = self
+			.get_note(note_id)?
+			.ok_or_else(|| PPMError::NotFound(format!("Note {} not found", note_id)))?;
 
-		if let Some(note) = notes.iter_mut().find(|n| &n.id == note_id) {
-			note.content = content;
-			self.save_notes(&notes)?;
-			Ok(())
-		} else {
-			Err(PPMError::NotFound(format!("Note {} not found", note_id)))
-		}
+		note.content = content;
+
+		let file_path = self.note_file_path(note_id);
+		let file_content = self.format_note_file(&note);
+		fs::write(&file_path, file_content)?;
+
+		Ok(())
 	}
 
 	fn list_notes(&self) -> PPMResult<Vec<Note>> {
-		self.load_notes()
+		if !self.notes_dir.exists() {
+			return Ok(Vec::new());
+		}
+
+		let mut notes = Vec::new();
+
+		for entry in fs::read_dir(&self.notes_dir)? {
+			let entry = entry?;
+			let path = entry.path();
+
+			if path.extension().and_then(|s| s.to_str()) == Some("md") {
+				let content = fs::read_to_string(&path)?;
+				if let Ok(note) = self.parse_note_file(&content) {
+					notes.push(note);
+				}
+			}
+		}
+
+		// Sort by created_at descending (newest first)
+		notes.sort_by(|a, b| b.created_at.cmp(&a.created_at));
+
+		Ok(notes)
 	}
 
 	fn list_notes_by_project(&self, project_name: &ProjectName) -> PPMResult<Vec<Note>> {
-		let notes = self.load_notes()?;
+		let notes = self.list_notes()?;
 		Ok(notes
 			.into_iter()
 			.filter(|n| n.associated_project_name.as_ref() == Some(project_name))
@@ -105,16 +201,13 @@ impl NoteRepository for LocalNoteRepository {
 	}
 
 	fn delete_note(&self, note_id: &NoteId) -> PPMResult<()> {
-		let mut notes = self.load_notes()?;
-		let initial_len = notes.len();
+		let file_path = self.note_file_path(note_id);
 
-		notes.retain(|n| &n.id != note_id);
-
-		if notes.len() == initial_len {
+		if !file_path.exists() {
 			return Err(PPMError::NotFound(format!("Note {} not found", note_id)));
 		}
 
-		self.save_notes(&notes)?;
+		fs::remove_file(&file_path)?;
 		Ok(())
 	}
 }
